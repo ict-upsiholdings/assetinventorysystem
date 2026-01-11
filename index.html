@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<title>Permohonan Aset</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#f2f2f2;
+  padding:20px;
+}
+.box {
+  max-width:500px;
+  margin:auto;
+  background:white;
+  padding:20px;
+  border-radius:10px;
+}
+input, select, button {
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+}
+button {
+  background:#0d6efd;
+  color:white;
+  border:none;
+}
+button:hover { background:#084298; }
+</style>
+</head>
+
+<body>
+<div class="box">
+  <h2 id="tajuk">Permohonan</h2>
+
+  <form id="form">
+    <input id="nama" placeholder="Nama" required>
+    <input id="jabatan" placeholder="Jabatan" required>
+
+    <select id="jenis">
+      <option value="alat_tulis">Alat Tulis</option>
+      <option value="kenderaan">Kenderaan</option>
+      <option value="projektor">Projektor</option>
+      <option value="kertas_a4">Kertas A4</option>
+    </select>
+
+    <input id="item" placeholder="Jenis / Bilangan">
+    <input id="tempoh" placeholder="Tempoh">
+    <input id="kuantiti" type="number" placeholder="Kuantiti">
+
+    <button type="submit">Hantar</button>
+  </form>
+
+  <p id="msg"></p>
+</div>
+
+<script>
+/* ================== URL API (WAJIB ISI) ================== */
+const SESSION_API = "https://script.google.com/macros/s/AKfycbwMf6GSN9kHfhmqNvanLF2TAEpHDPhfBS-g-KxStfVpRehLm7Znwdg6G_SyC8GCRGtooA/exec";
+
+const RESPONSE_API = {
+  alat_tulis:   "https://script.google.com/macros/s/AKfycbwdXh0iQ0ENMfqUEhXGcgaU41JCIBQ9IU0V3g9DjDshfkwYMDl3T2t0P0oNpNzkddBAfw/exec",
+  kenderaan:   "https://script.google.com/macros/s/AKfycbwbhIgyxWobB9WRBLs_pQPcBUKAKcZResAe3mBQBVdLjtI0Ya-K6_z3zunjmMBWqov7jQ/exec",
+  projektor:   "https://script.google.com/macros/s/AKfycbxWjh1hHWkwNXF1SzuRCiTPodlA91LYN1L4lo1FDjhsWG7ykKtp-u4HVM5CbMfUoUN5Hw/exec",
+  kertas_a4:   "https://script.google.com/macros/s/AKfycbyb4htvO1FBTusXEQmbs-cxcoteFADld9aKb8gWCYuE0S-qJ0KsKm9MxR52yIxBto4a/exec"
+};
+
+/* ================== LOAD QR SESSION ================== */
+const params = new URLSearchParams(window.location.search);
+const url = params.get("url");
+let SESSION_TYPE = null;
+
+async function loadSession() {
+  if (!url) return;
+
+  const res = await fetch(`${SESSION_API}?url=${url}`);
+  const data = await res.json();
+
+  if (!data || data.status === "not_found") {
+    alert("QR tidak sah");
+    return;
+  }
+
+  document.getElementById("tajuk").innerText = data.butiran;
+
+  const txt = data.butiran.toLowerCase();
+  if (txt.includes("alat")) SESSION_TYPE = "alat_tulis";
+  else if (txt.includes("kenderaan")) SESSION_TYPE = "kenderaan";
+  else if (txt.includes("projektor")) SESSION_TYPE = "projektor";
+  else SESSION_TYPE = "kertas_a4";
+
+  jenis.value = SESSION_TYPE;
+  jenis.disabled = true;
+}
+loadSession();
+
+/* ================== SUBMIT ================== */
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const today = new Date().toLocaleDateString("ms-MY");
+  let payload = {};
+
+  const type = SESSION_TYPE || jenis.value;
+
+  if (type === "alat_tulis") {
+    payload = {
+      Nama: nama.value,
+      Jabatan: jabatan.value,
+      Tarikh: today,
+      JenisAlat: item.value,
+      Kuantiti: kuantiti.value
+    };
+  }
+
+  if (type === "kenderaan") {
+    payload = {
+      Nama: nama.value,
+      Jabatan: jabatan.value,
+      Tarikh: today,
+      JenisKenderaan: item.value,
+      Tempoh: tempoh.value
+    };
+  }
+
+  if (type === "projektor") {
+    payload = {
+      Nama: nama.value,
+      Jabatan: jabatan.value,
+      Tarikh: today,
+      BilanganProjektor: item.value,
+      Tempoh: tempoh.value
+    };
+  }
+
+  if (type === "kertas_a4") {
+    payload = {
+      Nama: nama.value,
+      Jabatan: jabatan.value,
+      Tarikh: today,
+      Kuantiti: kuantiti.value
+    };
+  }
+
+  const res = await fetch(RESPONSE_API[type], {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  const json = await res.json();
+  msg.innerText = json.message || "Berjaya direkodkan";
+  form.reset();
+});
+</script>
+</body>
+</html>

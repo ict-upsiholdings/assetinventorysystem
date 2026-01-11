@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<title>Admin Permohonan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial;
+  background:#f2f2f2;
+  padding:20px;
+}
+.box {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+}
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+th, td {
+  border:1px solid #ccc;
+  padding:8px;
+}
+th { background:#eee; }
+</style>
+</head>
+
+<body>
+<div class="box">
+  <h2>Admin – Senarai Permohonan</h2>
+
+  <select id="jenis">
+    <option value="alat_tulis">Alat Tulis</option>
+    <option value="kenderaan">Kenderaan</option>
+    <option value="projektor">Projektor</option>
+    <option value="kertas_a4">Kertas A4</option>
+  </select>
+
+  <button onclick="loadData()">Load</button>
+
+  <table id="table"></table>
+</div>
+
+<script>
+/* ================== URL API GET ================== */
+const RESPONSE_API = {
+  alat_tulis: "https://script.google.com/macros/s/AKfycbzrH7zn7X4Wn5vwxTRyjrEnPKp7RPNEUiPYUPf6_s71GsFc_32idC3b9GJnWJP_tTeM/exec",
+  kenderaan: "https://script.google.com/macros/s/AKfycbyDB5VBMWLnwH2FeZn1ZaRRIhjOsAOhqD7mtWBuJ42ryMe8JUqgroFawSk3WnosBS6e4w/exec",
+  projektor: "https://script.google.com/macros/s/AKfycbxl1d4FiFQ9mytiTWmd8rQK2oi3UdOvxmlAA0lrGHz9GcaDXgtes6U1CRn0ELXw0ueL/exec",
+  kertas_a4: "https://script.google.com/macros/s/AKfycbw5qRtQUidu6SKeKfH6xSdfXgPvymURJuOP8_aJFInHA2_dEPN7k1j9pNdmW_53hPYB/exec"
+};
+
+async function loadData() {
+  const type = jenis.value;
+  const res = await fetch(RESPONSE_API[type]);
+  const data = await res.json();
+
+  table.innerHTML = "";
+  if (!data || data.length === 0) return;
+
+  table.innerHTML += `
+    <tr>${Object.keys(data[0]).map(h => `<th>${h}</th>`).join("")}</tr>
+  `;
+
+  data.forEach(row => {
+    table.innerHTML += `
+      <tr>${Object.values(row).map(v => `<td>${v}</td>`).join("")}</tr>
+    `;
+  });
+}
+</script>
+</body>
+</html>
