@@ -88,11 +88,13 @@ function updateField(type) {
   item.classList.add("hidden");
   tempoh.classList.add("hidden");
   kuantiti.classList.add("hidden");
+  item.type = "text"; // reset input type default
 
   if (type === "alat_tulis") {
     item.placeholder = "Jenis Alat";
     item.classList.remove("hidden");
     kuantiti.classList.remove("hidden");
+    kuantiti.type = "number";
   }
 
   if (type === "kenderaan") {
@@ -103,12 +105,14 @@ function updateField(type) {
 
   if (type === "projektor") {
     item.placeholder = "Bilangan Projektor";
+    item.type = "number";
     item.classList.remove("hidden");
     tempoh.classList.remove("hidden");
   }
 
   if (type === "kertas_a4") {
     kuantiti.classList.remove("hidden");
+    kuantiti.type = "number";
   }
 }
 
@@ -161,12 +165,16 @@ form.addEventListener("submit", async e => {
     return;
   }
 
-  const today = new Date().toLocaleDateString("ms-MY");
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2,'0');
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const yyyy = today.getFullYear();
+  const formattedDate = `${dd}/${mm}/${yyyy}`;
 
   let payload = {
     Nama: nama.value,
     Jabatan: jabatan.value,
-    Tarikh: today
+    Tarikh: formattedDate
   };
 
   if (type === "alat_tulis") {
@@ -195,10 +203,13 @@ form.addEventListener("submit", async e => {
       body: JSON.stringify(payload)
     });
 
-    const json = await res.json();
+    const json = await res.json().catch(()=>({message:"Berjaya direkodkan"}));
     msg.innerText = json.message || "Berjaya direkodkan";
+    
     form.reset();
     if (!SESSION_TYPE) updateField("");
+    else updateField(SESSION_TYPE);
+
   } 
   catch (err) {
     console.error(err);
@@ -208,5 +219,3 @@ form.addEventListener("submit", async e => {
 </script>
 </body>
 </html>
-
-
