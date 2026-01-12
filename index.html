@@ -29,19 +29,42 @@ button {
   border:none;
 }
 button:hover { background:#084298; }
+
 .hidden { display:none; }
+
+#staffList {
+  list-style:none;
+  padding:0;
+  margin:0;
+  border:1px solid #ccc;
+  max-height:150px;
+  overflow-y:auto;
+}
+#staffList li {
+  padding:8px;
+  cursor:pointer;
+}
+#staffList li:hover {
+  background:#eee;
+}
 </style>
 </head>
 
 <body>
+
 <div class="box">
   <h2 id="tajuk">Permohonan Aset</h2>
 
   <form id="form">
-    <input id="nama" placeholder="Nama" required>
-    <input id="jabatan" placeholder="Jabatan" required>
 
-    <select id="jenis">
+    <!-- STAFF AUTOCOMPLETE -->
+    <input id="nama" placeholder="Nama Staff" autocomplete="off" required>
+    <ul id="staffList"></ul>
+
+    <input id="jabatan" placeholder="Jabatan" readonly required>
+
+    <!-- PILIH ASET -->
+    <select id="jenis" required>
       <option value="">-- Pilih Aset --</option>
       <option value="alat_tulis">Alat Tulis</option>
       <option value="kenderaan">Kenderaan</option>
@@ -49,9 +72,10 @@ button:hover { background:#084298; }
       <option value="kertas_a4">Kertas A4</option>
     </select>
 
-    <input id="item" placeholder="Jenis / Bilangan">
-    <input id="tempoh" placeholder="Tempoh">
-    <input id="kuantiti" type="number" placeholder="Kuantiti">
+    <!-- FIELD DINAMIK -->
+    <input id="item" class="hidden" placeholder="">
+    <input id="tempoh" class="hidden" placeholder="Tempoh">
+    <input id="kuantiti" class="hidden" type="number" placeholder="Kuantiti">
 
     <button type="submit">Hantar</button>
   </form>
@@ -60,31 +84,150 @@ button:hover { background:#084298; }
 </div>
 
 <script>
-/* ================== URL API ================== */
-const SESSION_API = "https://script.google.com/macros/s/AKfycbwMf6GSN9kHfhmqNvanLF2TAEpHDPhfBS-g-KxStfVpRehLm7Znwdg6G_SyC8GCRGtooA/exec";
+/* ================== API ================== */
+const STAFF_API = "<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<title>Permohonan Aset</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#f2f2f2;
+  padding:20px;
+}
+.box {
+  max-width:500px;
+  margin:auto;
+  background:white;
+  padding:20px;
+  border-radius:10px;
+}
+input, select, button {
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+}
+button {
+  background:#0d6efd;
+  color:white;
+  border:none;
+}
+button:hover { background:#084298; }
+
+.hidden { display:none; }
+
+#staffList {
+  list-style:none;
+  padding:0;
+  margin:0;
+  border:1px solid #ccc;
+  max-height:150px;
+  overflow-y:auto;
+}
+#staffList li {
+  padding:8px;
+  cursor:pointer;
+}
+#staffList li:hover {
+  background:#eee;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2 id="tajuk">Permohonan Aset</h2>
+
+  <form id="form">
+
+    <!-- STAFF AUTOCOMPLETE -->
+    <input id="nama" placeholder="Nama Staff" autocomplete="off" required>
+    <ul id="staffList"></ul>
+
+    <input id="jabatan" placeholder="Jabatan" readonly required>
+
+    <!-- PILIH ASET -->
+    <select id="jenis" required>
+      <option value="">-- Pilih Aset --</option>
+      <option value="alat_tulis">Alat Tulis</option>
+      <option value="kenderaan">Kenderaan</option>
+      <option value="projektor">Projektor</option>
+      <option value="kertas_a4">Kertas A4</option>
+    </select>
+
+    <!-- FIELD DINAMIK -->
+    <input id="item" class="hidden" placeholder="">
+    <input id="tempoh" class="hidden" placeholder="Tempoh">
+    <input id="kuantiti" class="hidden" type="number" placeholder="Kuantiti">
+
+    <button type="submit">Hantar</button>
+  </form>
+
+  <p id="msg"></p>
+</div>
+
+<script>
+/* ================== API ================== */
+const STAFF_API = "https://script.google.com/macros/s/AKfycbxdgF9XIHQ_enzCHLK_8nyrqFBh3bKCnqlQ_vN5B1lEYR48DDCTVksm536ioKNs8li9/exec";
 
 const RESPONSE_API = {
-  alat_tulis: "https://script.google.com/macros/s/AKfycbwdXh0iQ0ENMfqUEhXGcgaU41JCIBQ9IU0V3g9DjDshfkwYMDl3T2t0P0oNpNzkddBAfw/exec",
+   alat_tulis: "https://script.google.com/macros/s/AKfycbwdXh0iQ0ENMfqUEhXGcgaU41JCIBQ9IU0V3g9DjDshfkwYMDl3T2t0P0oNpNzkddBAfw/exec",
   kenderaan: "https://script.google.com/macros/s/AKfycbwbhIgyxWobB9WRBLs_pQPcBUKAKcZResAe3mBQBVdLjtI0Ya-K6_z3zunjmMBWqov7jQ/exec",
   projektor: "https://script.google.com/macros/s/AKfycbxWjh1hHWkwNXF1SzuRCiTPodlA91LYN1L4lo1FDjhsWG7ykKtp-u4HVM5CbMfUoUN5Hw/exec",
   kertas_a4: "https://script.google.com/macros/s/AKfycbyb4htvO1FBTusXEQmbs-cxcoteFADld9aKb8gWCYuE0S-qJ0KsKm9MxR52yIxBto4a/exec"
 };
 
 /* ================== ELEMENT ================== */
+const nama = document.getElementById("nama");
+const jabatan = document.getElementById("jabatan");
+const staffList = document.getElementById("staffList");
+
 const jenis = document.getElementById("jenis");
 const item = document.getElementById("item");
 const tempoh = document.getElementById("tempoh");
 const kuantiti = document.getElementById("kuantiti");
+
 const form = document.getElementById("form");
 const msg = document.getElementById("msg");
 
-let SESSION_TYPE = null;
+/* ================== AUTOCOMPLETE STAFF ================== */
+nama.addEventListener("input", async () => {
+  const q = nama.value.trim();
+  staffList.innerHTML = "";
+  jabatan.value = "";
+
+  if (q.length < 2) return;
+
+  const res = await fetch(`${STAFF_API}?search=${encodeURIComponent(q)}`);
+  const data = await res.json();
+
+  data.forEach(staff => {
+    const li = document.createElement("li");
+    li.textContent = staff.Nama;
+
+    li.onclick = () => {
+      nama.value = staff.Nama;
+      jabatan.value = staff.Dept;
+      staffList.innerHTML = "";
+    };
+
+    staffList.appendChild(li);
+  });
+});
 
 /* ================== FIELD CONTROL ================== */
 function updateField(type) {
   item.classList.add("hidden");
   tempoh.classList.add("hidden");
   kuantiti.classList.add("hidden");
+
+  item.value = "";
+  tempoh.value = "";
+  kuantiti.value = "";
 
   if (type === "alat_tulis") {
     item.placeholder = "Jenis Alat";
@@ -113,40 +256,16 @@ jenis.addEventListener("change", () => {
   updateField(jenis.value);
 });
 
-/* ================== QR SESSION ================== */
-const params = new URLSearchParams(window.location.search);
-const url = params.get("url");
-
-async function loadSession() {
-  if (!url) return;
-
-  const res = await fetch(`${SESSION_API}?url=${url}`);
-  const data = await res.json();
-
-  if (!data || data.status === "not_found") {
-    alert("QR tidak sah");
-    return;
-  }
-
-  document.getElementById("tajuk").innerText = data.butiran;
-
-  const txt = data.butiran.toLowerCase();
-  if (txt.includes("alat")) SESSION_TYPE = "alat_tulis";
-  else if (txt.includes("kenderaan")) SESSION_TYPE = "kenderaan";
-  else if (txt.includes("projektor")) SESSION_TYPE = "projektor";
-  else SESSION_TYPE = "kertas_a4";
-
-  jenis.value = SESSION_TYPE;
-  jenis.disabled = true;
-  updateField(SESSION_TYPE);
-}
-loadSession();
-
 /* ================== SUBMIT ================== */
 form.addEventListener("submit", async e => {
   e.preventDefault();
 
-  const type = SESSION_TYPE || jenis.value;
+  if (!jabatan.value) {
+    msg.innerText = "❌ Sila pilih nama staff dari senarai";
+    return;
+  }
+
+  const type = jenis.value;
   const today = new Date().toLocaleDateString("ms-MY");
 
   let payload = {
@@ -181,10 +300,13 @@ form.addEventListener("submit", async e => {
   });
 
   const json = await res.json();
-  msg.innerText = json.message || "Berjaya direkodkan";
+  msg.innerText = json.message || "✅ Permohonan berjaya direkodkan";
+
   form.reset();
-  if (!SESSION_TYPE) updateField("");
+  updateField("");
+  staffList.innerHTML = "";
 });
 </script>
+
 </body>
 </html>
