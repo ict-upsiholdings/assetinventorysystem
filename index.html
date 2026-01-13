@@ -96,6 +96,17 @@ async function loadNamesData(){
     try{ 
         const res=await fetch(NAMES_API); 
         namesData=await res.json(); 
+
+        // Trim semua key supaya space di header tak jadi masalah
+        namesData = namesData.map(item => {
+            const clean = {};
+            for (let k in item) {
+                clean[k.trim()] = item[k];
+            }
+            return clean;
+        });
+
+        console.log('Names Data:', namesData); // semak console
     }catch(e){ namesData=[]; console.error(e); showError('Gagal memuatkan data nama'); }
 }
 
@@ -135,7 +146,7 @@ function setupNameAutocomplete(){
 
                 div.onclick=()=>{
                     namaInput.value=item.Nama;
-                    // AUTO isi jabatan robust (case insensitive)
+                    // AUTO isi jabatan robust
                     jabatanInput.value = item.Jabatan ?? item.jabatan ?? '';
                     dropdown.classList.add('hidden');
                 };
