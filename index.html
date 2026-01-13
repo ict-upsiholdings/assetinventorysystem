@@ -18,9 +18,10 @@ input, select, button { width:100%; padding:10px; border-radius:8px; border:1px 
 button { background:#0d6efd; color:white; border:none; cursor:pointer; margin-top:12px; }
 button:hover { background:#084298; }
 .hidden { display:none; }
-#nameDropdown { border:1px solid #ccc; background:white; max-height:180px; overflow-y:auto; position:absolute; z-index:1000; }
+#nameDropdown { border:1px solid #ccc; background:white; max-height:180px; overflow-y:auto; position:absolute; z-index:1000; width:calc(100% - 22px); border-radius:8px; }
 #nameDropdown .name-option { padding:8px; cursor:pointer; }
 #nameDropdown .name-option:hover { background:#eef6ff; }
+.name-highlight { font-weight:bold; color:#0d6efd; }
 .message { margin-top:12px; padding:10px; border-radius:10px; display:none; text-align:center; font-weight:600; }
 .success { background:#D1FAE5; color:#065F46; border:1px solid #6EE7B7; }
 .error { background:#FEE2E2; color:#991B1B; border:1px solid #FCA5A5; }
@@ -32,7 +33,6 @@ button:hover { background:#084298; }
 <div class="form-container">
     <div class="logo-container">
         <img src="Screenshot 2026-01-05 160523.png" alt="UPSI">
-        
     </div>
 
     <h1>Sistem Permohonan Aset</h1>
@@ -45,9 +45,8 @@ button:hover { background:#084298; }
         <div id="nameDropdown" class="hidden"></div>
 
         <label for="jabatan">Jabatan <span style="color:red">*</span></label>
-        <input type="text" id="jabatan" name="jabatan" required>
+        <input type="text" id="jabatan" name="jabatan" required readonly>
 
-        <!-- Pilihan jenis aset -->
         <label for="jenisSelect">Jenis Aset / Kategori</label>
         <select id="jenisSelect">
             <option value="">-- Pilih --</option>
@@ -72,10 +71,10 @@ button:hover { background:#084298; }
 <script>
 const NAMES_API = 'https://script.google.com/macros/s/AKfycbyOiDjp4mLgDGtnc2eOPCiajJOHqC1z0UUVevH2mBro9XY2KM8c56oTqhV-nifyDkJK/exec';
 const POST_API = {
-     alat_tulis: "https://script.google.com/macros/s/AKfycbz0msu-Bk1yexgmVsrtPt9vbvu5xqJZLFlj43Bk5JMCJUugCMBlbPOafnSgXbdVsnk6iQ/exec",
-  kenderaan: "https://script.google.com/macros/s/AKfycbyNvyn-WzAB-GSx3Fpcd-JD9JmUwPCW4nu2VQh6zKpn5q3Maqgt0Y4UU-Z_CYg_p77fUg/exec",
-  projektor: "https://script.google.com/macros/s/AKfycbwfEoubXcvGINSJoAb2r1HT_akTO7WFQxh4hV3Q_X0EuXZ6I78hJk4Ll8edN99dfmL_/exec",
-  kertas_a4: "https://script.google.com/macros/s/AKfycbzhBY_KhGAFRGea-_sNb_yd9QRIXyNBlKNrK5zv5lCYyByGjKgGufZNgYvgCIOug2nH/exec"
+    alat_tulis: "https://script.google.com/macros/s/AKfycbz0msu-Bk1yexgmVsrtPt9vbvu5xqJZLFlj43Bk5JMCJUugCMBlbPOafnSgXbdVsnk6iQ/exec",
+    kenderaan: "https://script.google.com/macros/s/AKfycbyNvyn-WzAB-GSx3Fpcd-JD9JmUwPCW4nu2VQh6zKpn5q3Maqgt0Y4UU-Z_CYg_p77fUg/exec",
+    projektor: "https://script.google.com/macros/s/AKfycbwfEoubXcvGINSJoAb2r1HT_akTO7WFQxh4hV3Q_X0EuXZ6I78hJk4Ll8edN99dfmL_/exec",
+    kertas_a4: "https://script.google.com/macros/s/AKfycbzhBY_KhGAFRGea-_sNb_yd9QRIXyNBlKNrK5zv5lCYyByGjKgGufZNgYvgCIOug2nH/exec"
 };
 
 let namesData = [];
@@ -100,30 +99,42 @@ async function loadNamesData(){
     }catch(e){ namesData=[]; console.error(e); showError('Gagal memuatkan data nama'); }
 }
 
+// Fungsi highlight search term
+function highlightText(text, term){
+    const re = new RegExp(`(${term})`, 'ig');
+    return text.replace(re, '<span class="name-highlight">$1</span>');
+}
+
 function setupNameAutocomplete(){
     const namaInput=document.getElementById('namaInput');
     const jabatanInput=document.getElementById('jabatan');
     const dropdown=document.getElementById('nameDropdown');
 
     namaInput.addEventListener('input',function(){
-        const q=this.value.trim().toLowerCase();
-        if(!q){ dropdown.classList.add('hidden'); return; }
-        const filtered=namesData.filter(x=>x.Nama.toLowerCase().includes(q));
+        const q=this.value.trim();
+        if(!q){ dropdown.classList.add('hidden'); jabatanInput.value=''; return; }
+
+        const filtered=namesData.filter(x=>x.Nama.toLowerCase().includes(q.toLowerCase()));
         dropdown.innerHTML='';
+
         if(filtered.length===0){
             const div=document.createElement('div');
             div.className='name-option';
-            div.innerText=`Tambah: "${this.value}"`;
-            div.onclick=()=>{ namaInput.value=this.value; jabatanInput.value=''; dropdown.classList.add('hidden'); };
+            div.innerHTML=`Tambah: "<span class="name-highlight">${q}</span>"`;
+            div.onclick=()=>{
+                namaInput.value=q;
+                jabatanInput.value='';
+                dropdown.classList.add('hidden');
+            };
             dropdown.appendChild(div);
-        }else{
+        } else {
             filtered.forEach(item=>{
                 const div=document.createElement('div');
                 div.className='name-option';
-                div.innerText=item.Nama;
+                div.innerHTML=highlightText(item.Nama,q);
                 div.onclick=()=>{
                     namaInput.value=item.Nama;
-                    jabatanInput.value=item.Jabatan;
+                    jabatanInput.value=item.Jabatan; // auto isi jabatan
                     dropdown.classList.add('hidden');
                 };
                 dropdown.appendChild(div);
@@ -140,6 +151,7 @@ function setupNameAutocomplete(){
 document.getElementById('jenisSelect').addEventListener('change',function(){
     const type=this.value;
     ['item','tempoh','kuantiti'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+    document.getElementById('item').value=''; document.getElementById('tempoh').value=''; document.getElementById('kuantiti').value='';
     if(type==='alat_tulis'){ document.getElementById('item').placeholder='Jenis Alat'; document.getElementById('item').classList.remove('hidden'); document.getElementById('kuantiti').classList.remove('hidden'); }
     if(type==='kenderaan'){ document.getElementById('item').placeholder='Jenis Kenderaan'; document.getElementById('item').classList.remove('hidden'); document.getElementById('tempoh').classList.remove('hidden'); }
     if(type==='projektor'){ document.getElementById('item').placeholder='Bilangan Projektor'; document.getElementById('item').classList.remove('hidden'); document.getElementById('tempoh').classList.remove('hidden'); }
@@ -183,6 +195,7 @@ document.getElementById('assetForm').addEventListener('submit',async function(e)
         if(result.status==='success'){ 
             showMessage(`✓ Permohonan ${nama} berjaya direkod!`,'success'); 
             this.reset();
+            document.getElementById('jabatan').value=''; 
         }else{ showMessage('✗ '+(result.message||'Ralat tidak diketahui'),'error'); }
     }catch(e){ console.error(e); showMessage('✗ Ralat semasa menghantar.','error'); }
     finally{ document.getElementById('submitBtn').disabled=false; }
@@ -196,4 +209,3 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
 </body>
 </html>
-
