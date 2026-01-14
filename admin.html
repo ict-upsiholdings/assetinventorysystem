@@ -50,16 +50,15 @@ body{
   flex:1;
   padding:15px;
   background:rgba(255,255,255,0.2);
-  border:2px solid transparent;
   border-radius:12px;
   color:white;
   font-size:18px;
   font-weight:600;
   cursor:pointer;
   text-align:center;
-  transition:.3s;
 }
-.tab.active{background:var(--card);color:var(--bg1);border-color:var(--accent);}
+.tab.active{background:var(--card);color:var(--bg1);}
+
 .content-section{display:none;}
 .content-section.active{display:block;}
 
@@ -75,7 +74,7 @@ body{
   box-shadow:0 10px 30px rgba(0,0,0,.2);
   text-align:center;
 }
-.qr-card h3{color:var(--bg1);margin-bottom:10px;}
+.qr-card h3{color:var(--bg1);}
 .qr-code-container{
   background:#fff;
   padding:15px;
@@ -117,16 +116,16 @@ th{background:var(--bg1);color:white;}
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('qr')">Jana QR Code</div>
-    <div class="tab" onclick="switchTab('permohonan')">Senarai Permohonan</div>
+    <div class="tab" onclick="switchTab('data')">Senarai Permohonan</div>
   </div>
 
-  <!-- QR SECTION -->
+  <!-- QR -->
   <div id="qrSection" class="content-section active">
     <div class="qr-grid" id="qrGrid"></div>
   </div>
 
-  <!-- PERMOHONAN SECTION -->
-  <div id="permohonanSection" class="content-section">
+  <!-- DATA -->
+  <div id="dataSection" class="content-section">
     <div class="filter-bar">
       <select id="filterJenis" onchange="applyFilter()">
         <option value="all">Semua</option>
@@ -149,7 +148,7 @@ th{background:var(--bg1);color:white;}
             <th>Tarikh</th>
           </tr>
         </thead>
-        <tbody id="permohonanTable">
+        <tbody id="dataTable">
           <tr><td colspan="6" class="loading">Memuatkan data...</td></tr>
         </tbody>
       </table>
@@ -158,39 +157,40 @@ th{background:var(--bg1);color:white;}
 </div>
 
 <script>
-// ====== SECURITY ======
+// ===== SECURITY =====
 if(sessionStorage.getItem('isLoggedIn')!=='true'){
-  window.location.href='adminlogin.html';
+  location.href='adminlogin.html';
 }
 function logout(){
   sessionStorage.clear();
-  window.location.href='adminlogin.html';
+  location.href='adminlogin.html';
 }
 
-// ====== DATA QR (4 SHEET SAHAJA) ======
+// ===== 4 URL (QR TAK DIUBAH) =====
 const SESSION_URLS = [
-  { label:"Alat Tulis", url:"https://script.google.com/macros/s/AKfycbzteaAicSGci8gjiy6qZq8PslluWWRfZNOhu7dC_8gnrU8RHuseFglRKVfFygpzk1Eu/exec" },
-  { label:"Kenderaan", url:"https://script.google.com/macros/s/AKfycbwnujNL7Zvaryk71udEAIjHYYrHym-zXLgI8p-HB1TH4zFdmf_czTIcWazRj_vZ1vhrig/exec" },
-  { label:"Projektor", url:"https://script.google.com/macros/s/AKfycbywBA3URsRomdjq2lH_zLKn0PYivCOVn6AgFWINVPQfScYXUq2SlMoOvmi-WhfcRbjP/exec" },
-  { label:"Kertas A4", url:"https://script.google.com/macros/s/AKfycbwoDHhFJuucCtB-Lt0VJLWQ7sq_U7UmXoRip_hD_WFqFT0Z6ml7vbuyFExw3f8ByTkZ/exec" }
+  { label:"Alat Tulis", url:"https://script.google.com/macros/s/AKfycbw9oPJKKqwhjLWJrVA2cMzKAp9W1eC1VUmfEXBv1vsZaPpbFAuh5nFZ7FnfvzBVDCnN/exec" },
+  { label:"Kenderaan", url:"https://script.google.com/macros/s/AKfycby1TDj5S6Bw4OoTFGcg6bkKGphIHak3PTYQAOUQnUJrcFBXwKrG8xRclA3BWAESOYM/exec" },
+  { label:"Projektor", url:"https://script.google.com/macros/s/AKfycbz3Jk5o9vfJCXT6dmGqHxAQSc_gB0tmcCPOTNyF5EJ9dHDGhusLDu09rYDw4nudRpTb/exec" },
+  { label:"Kertas A4", url:"https://script.google.com/macros/s/AKfycbzcxX4CoQqEH-c--k8x_OJZccifA-gybXFI1sK5QvDCvkh9_K0QAq53R--32b9dmqQV/exec" }
 ];
 
-// ====== TAB ======
+// ===== TAB =====
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));
+
   if(tab==='qr'){
     document.querySelectorAll('.tab')[0].classList.add('active');
     document.getElementById('qrSection').classList.add('active');
     generateQRCodes();
   }else{
     document.querySelectorAll('.tab')[1].classList.add('active');
-    document.getElementById('permohonanSection').classList.add('active');
-    loadPermohonan();
+    document.getElementById('dataSection').classList.add('active');
+    loadData();
   }
 }
 
-// ====== QR GENERATOR (LABEL IKUT SHEET) ======
+// ===== QR (KEKAL URL ASAL) =====
 function generateQRCodes(){
   const grid=document.getElementById('qrGrid');
   grid.innerHTML='';
@@ -200,14 +200,17 @@ function generateQRCodes(){
     card.innerHTML=`
       <h3>QR ${item.label}</h3>
       <div class="qr-code-container" id="qr${i}"></div>
-      <button class="download-btn"
-        onclick="downloadQR('qr${i}','QR_${item.label.replace(/\s+/g,'_')}')">
-        Muat Turun QR Code
+      <button class="download-btn" onclick="downloadQR('qr${i}','QR_${item.label}')">
+        Muat Turun QR
       </button>`;
     grid.appendChild(card);
+
     new QRCode(document.getElementById(`qr${i}`),{
-      text:item.url,width:200,height:200,
-      colorDark:"#1A2350",colorLight:"#fff",
+      text:item.url,
+      width:200,
+      height:200,
+      colorDark:"#1A2350",
+      colorLight:"#ffffff",
       correctLevel:QRCode.CorrectLevel.H
     });
   });
@@ -215,45 +218,53 @@ function generateQRCodes(){
 
 function downloadQR(id,name){
   const canvas=document.querySelector(`#${id} canvas`);
-  const link=document.createElement('a');
-  link.href=canvas.toDataURL();
-  link.download=name+'.png';
-  link.click();
+  const a=document.createElement('a');
+  a.href=canvas.toDataURL();
+  a.download=name+'.png';
+  a.click();
 }
 
-// ====== PERMOHONAN ======
-let allPermohonanData=[];
-async function loadPermohonan(){
-  allPermohonanData=[];
-  const tbody=document.getElementById('permohonanTable');
+// ===== DATA =====
+let allData=[];
+
+async function loadData(){
+  allData=[];
+  const tbody=document.getElementById('dataTable');
   tbody.innerHTML='<tr><td colspan="6" class="loading">Memuatkan...</td></tr>';
+
   for(const item of SESSION_URLS){
     const res=await fetch(item.url);
     const data=await res.json();
-    if(Array.isArray(data)) allPermohonanData=allPermohonanData.concat(data);
+
+    if(Array.isArray(data)){
+      data.forEach(d=>d.JenisPermohonan=item.label);
+      allData=allData.concat(data);
+    }
   }
-  displayPermohonan(allPermohonanData);
+  renderTable(allData);
 }
 
-function displayPermohonan(data){
-  const tbody=document.getElementById('permohonanTable');
+function renderTable(data){
+  const tbody=document.getElementById('dataTable');
   if(!data.length){
-    tbody.innerHTML='<tr><td colspan="6" class="loading">Tiada data</td></tr>';return;
+    tbody.innerHTML='<tr><td colspan="6" class="loading">Tiada data</td></tr>';
+    return;
   }
   tbody.innerHTML=data.map((r,i)=>`
     <tr>
       <td>${i+1}</td>
-      <td>${r.JenisPermohonan||'-'}</td>
+      <td>${r.JenisPermohonan}</td>
       <td>${r.Nama||'-'}</td>
       <td>${r.Jabatan||'-'}</td>
       <td>${r.Kuantiti||'-'}</td>
       <td>${r.Timestamp||'-'}</td>
-    </tr>`).join('');
+    </tr>
+  `).join('');
 }
 
 function applyFilter(){
   const v=document.getElementById('filterJenis').value;
-  displayPermohonan(v==='all'?allPermohonanData:allPermohonanData.filter(r=>r.JenisPermohonan===v));
+  renderTable(v==='all'?allData:allData.filter(d=>d.JenisPermohonan===v));
 }
 
 document.addEventListener('DOMContentLoaded',generateQRCodes);
