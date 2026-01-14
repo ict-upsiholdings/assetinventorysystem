@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Portal - Sistem Permohonan</title>
+<title>Admin Portal - Permohonan</title>
 <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
   --bg1:#1A2350;
@@ -15,265 +15,179 @@
   --accent:#12D8FA;
   --muted:#6B7280;
 }
-*{box-sizing:border-box;margin:0;padding:0;font-family:'League Spartan',sans-serif;}
 body{
+  margin:0;
+  font-family:'League Spartan',sans-serif;
   background:linear-gradient(135deg,var(--bg1),var(--bg2));
   min-height:100vh;
   padding:20px;
 }
-.container{
-  max-width:1200px;
-  margin:auto;
-}
-.header{
-  background:var(--card);
-  padding:30px;
-  border-radius:20px;
-  margin-bottom:30px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.2);
-  position:relative;
-}
-.header h1{color:var(--bg1);font-size:32px;margin-bottom:10px;}
-.header .subtitle{color:#4A4A4A;font-size:16px;}
-.header button.logout{
-  position:absolute;
-  top:30px;
-  right:30px;
-  background:#f87171;
-  color:#fff;
-  border:none;
-  padding:12px 20px;
-  border-radius:10px;
-  cursor:pointer;
-}
-
-.tabs{
-  display:flex;
-  gap:10px;
-  margin-bottom:30px;
-}
-.tab{
-  flex:1;
-  padding:15px;
-  background:rgba(255,255,255,0.2);
-  border:2px solid transparent;
-  border-radius:12px;
-  color:white;
-  font-size:18px;
-  font-weight:600;
-  cursor:pointer;
-  text-align:center;
-  transition:all 0.3s ease;
-}
-.tab:hover{background:rgba(255,255,255,0.3);}
-.tab.active{background:var(--card);color:var(--bg1);border-color:var(--accent);}
-
-.content-section{display:none;}
-.content-section.active{display:block;}
-
-.qr-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:20px;
-  margin-bottom:30px;
-}
-.qr-card{
-  background:var(--card);
-  padding:25px;
-  border-radius:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.2);
-  text-align:center;
-}
-.qr-card h3{color:var(--bg1);margin-bottom:10px;}
-.qr-card .qr-code-container{
-  background:white;
-  padding:15px;
-  border-radius:12px;
-  margin:15px 0;
-  display:inline-block;
-}
-.download-btn{
-  width:100%;
-  padding:12px;
-  background:linear-gradient(135deg,var(--bg2),var(--accent));
-  color:white;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  font-weight:600;
-  cursor:pointer;
-  transition:all 0.3s ease;
-}
-.download-btn:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(31,162,255,0.3);}
-
-.table-container{overflow-x:auto;background:var(--card);border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
-table{width:100%;border-collapse:collapse;font-size:14px;}
-th,td{padding:10px;border-bottom:1px solid #e0e0e0;text-align:left;}
-th{background:var(--bg1);color:white;position:sticky;top:0;}
-tr:hover{background:#f8f9fa;}
-
-.loading{text-align:center;color:var(--muted);padding:20px;}
-.error-message{background:#ffebee;color:#c62828;padding:15px;border-radius:10px;margin-bottom:20px;border-left:4px solid #c62828;text-align:center;}
-
-.filter-bar{display:flex;gap:15px;margin-bottom:15px;flex-wrap:wrap;}
-.filter-bar select{padding:10px 15px;border:1px solid #ccc;border-radius:8px;}
-@media(max-width:768px){
-  .tabs{flex-direction:column;}
-  .qr-grid{grid-template-columns:1fr;}
-  .filter-bar{flex-direction:column;}
-}
+h1,h2,h3{color:#1A2350;text-align:center;margin-bottom:15px;}
+.container{max-width:1200px;margin:auto;}
+.qr-grid{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-bottom:30px;}
+.qr-card{background:#fff;padding:15px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,0.2);text-align:center;width:220px;}
+.download-btn{margin-top:10px;padding:5px 10px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;}
+.filter{margin-bottom:20px;text-align:center;}
+.filter select{padding:8px;border-radius:6px;border:1px solid #ccc;}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+thead{background:var(--bg1);color:#fff;}
+th,td{padding:10px;text-align:left;border-bottom:1px solid #ddd;}
+.pdf-btn{margin:15px 0;padding:8px 15px;border:none;border-radius:6px;background:#FF5722;color:#fff;cursor:pointer;float:right;}
 </style>
 </head>
 <body>
-
 <div class="container">
-  <div class="header">
-    <h1>Admin Portal Sistem Permohonan</h1>
-    <p class="subtitle">Dicipta oleh UPSI Holdings Sdn. Bhd.</p>
-    <button class="logout" onclick="logout()">Log Keluar</button>
+  <h1>Admin Portal - Permohonan Aset</h1>
+
+  <h2>QR Code Permohonan</h2>
+  <div class="qr-grid" id="qrGrid"></div>
+
+  <h2>Senarai Permohonan</h2>
+  <div class="filter">
+    <label for="jenisFilter">Tapis mengikut jenis permohonan:</label>
+    <select id="jenisFilter">
+      <option value="">Semua</option>
+      <option value="Kenderaan">Kenderaan</option>
+      <option value="Alat Tulis">Alat Tulis</option>
+      <option value="Projektor">Projektor</option>
+      <option value="Kertas A4">Kertas A4</option>
+    </select>
+    <button class="pdf-btn" id="downloadPDF">Muat Turun PDF</button>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('qr')">Jana QR Code</div>
-    <div class="tab" onclick="switchTab('permohonan')">Senarai Permohonan</div>
-  </div>
-
-  <!-- QR Code Section -->
-  <div id="qrSection" class="content-section active">
-    <div class="qr-grid" id="qrGrid">
-      <div style="grid-column:1/-1;text-align:center;color:white;padding:40px;">
-        Memuatkan QR Code...
-      </div>
-    </div>
-  </div>
-
-  <!-- Permohonan Section -->
-  <div id="permohonanSection" class="content-section">
-    <div class="filter-bar">
-      <label for="filterJenis">Tapis Jenis Permohonan:</label>
-      <select id="filterJenis" onchange="applyFilter()">
-        <option value="all">Semua</option>
-        <option value="Kenderaan">Kenderaan</option>
-        <option value="Alat Tulis">Alat Tulis</option>
-        <option value="Projektor">Projektor</option>
-        <option value="Kertas A4">Kertas A4</option>
-      </select>
-    </div>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Jenis Permohonan</th>
-            <th>Nama</th>
-            <th>Jabatan</th>
-            <th>Kuantiti</th>
-            <th>Tarikh & Masa</th>
-          </tr>
-        </thead>
-        <tbody id="permohonanTable">
-          <tr><td colspan="6" class="loading">Memuatkan data...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+  <table id="permohonanTable">
+    <thead>
+      <tr id="tableHeader"></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
 </div>
 
 <script>
-// Redirect jika belum login
-if(sessionStorage.getItem('isLoggedIn') !== 'true'){
-  window.location.href='adminlogin.html';
-}
-
-// Logout
-function logout(){sessionStorage.clear();window.location.href='adminlogin.html';}
-
-// Tab switch
-function switchTab(tab){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));
-  if(tab==='qr'){document.querySelectorAll('.tab')[0].classList.add('active');document.getElementById('qrSection').classList.add('active');generateQRCodes();}
-  else{document.querySelectorAll('.tab')[1].classList.add('active');document.getElementById('permohonanSection').classList.add('active');loadPermohonan();}
-}
-
-// ==== QR Code Section ====
-const SESSION_URLS=[
-  'https://script.google.com/macros/s/AKfycbwAcZuDryEzXB8ZpaGY88DMCOv9LzO7jhA4MXqNcwT0H809DXlVSz2AroZ-veYAkju2/exec', // QR URL
-  'https://script.google.com/macros/s/AKfycbzteaAicSGci8gjiy6qZq8PslluWWRfZNOhu7dC_8gnrU8RHuseFglRKVfFygpzk1Eu/exec', // Alat Tulis
-  'https://script.google.com/macros/s/AKfycbwnujNL7Zvaryk71udEAIjHYYrHym-zXLgI8p-HB1TH4zFdmf_czTIcWazRj_vZ1vhrig/exec', // Kenderaan
-  'https://script.google.com/macros/s/AKfycbywBA3URsRomdjq2lH_zLKn0PYivCOVn6AgFWINVPQfScYXUq2SlMoOvmi-WhfcRbjP/exec', // Projektor
-  'https://script.google.com/macros/s/AKfycbwoDHhFJuucCtB-Lt0VJLWQ7sq_U7UmXoRip_hD_WFqFT0Z6ml7vbuyFExw3f8ByTkZ/exec'  // Kertas A4
+const qrUrls = [
+  {url:"https://script.google.com/macros/s/AKfycbwnujNL7Zvaryk71udEAIjHYYrHym-zXLgI8p-HB1TH4zFdmf_czTIcWazRj_vZ1vhrig/exec", label:"Kenderaan"},
+  {url:"https://script.google.com/macros/s/AKfycbzteaAicSGci8gjiy6qZq8PslluWWRfZNOhu7dC_8gnrU8RHuseFglRKVfFygpzk1Eu/exec", label:"Alat Tulis"},
+  {url:"https://script.google.com/macros/s/AKfycbywBA3URsRomdjq2lH_zLKn0PYivCOVn6AgFWINVPQfScYXUq2SlMoOvmi-WhfcRbjP/exec", label:"Projektor"},
+  {url:"https://script.google.com/macros/s/AKfycbwoDHhFJuucCtB-Lt0VJLWQ7sq_U7UmXoRip_hD_WFqFT0Z6ml7vbuyFExw3f8ByTkZ/exec", label:"Kertas A4"}
 ];
 
-async function generateQRCodes(){
-  const grid=document.getElementById('qrGrid');
+function generateQRCodes(){
+  const grid = document.getElementById('qrGrid');
   grid.innerHTML='';
-  SESSION_URLS.forEach((url,i)=>{
+  qrUrls.forEach((item,index)=>{
     const card=document.createElement('div');
     card.className='qr-card';
-    card.innerHTML=`<h3>QR ${i+1}</h3>
-      <div class="qr-code-container" id="qr${i}"></div>
-      <button class="download-btn" onclick="downloadQR('qr${i}','QR_${i+1}')">Muat Turun QR Code</button>`;
+    card.innerHTML=`<h3>${item.label}</h3><div id="qr${index+1}"></div>
+    <button class="download-btn" onclick="downloadQR('qr${index+1}','QR_${item.label.replace(/\s/g,'_')}')">Muat Turun QR Code</button>`;
     grid.appendChild(card);
-    new QRCode(document.getElementById(`qr${i}`),{text:url,width:200,height:200,colorDark:"#1A2350",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+    new QRCode(document.getElementById(`qr${index+1}`),{
+      text:item.url,
+      width:200,
+      height:200,
+      colorDark:"#1A2350",
+      colorLight:"#fff",
+      correctLevel:QRCode.CorrectLevel.H
+    });
   });
 }
 
 function downloadQR(id,filename){
-  const canvas=document.querySelector(`#${id} canvas`);
-  if(!canvas){alert('QR belum siap');return;}
-  const url=canvas.toDataURL('image/png');
-  const link=document.createElement('a');
-  link.href=url;link.download=filename+'.png';link.click();
+  const qrCanvas = document.getElementById(id).querySelector('canvas');
+  const link = document.createElement('a');
+  link.href = qrCanvas.toDataURL("image/png");
+  link.download = filename+'.png';
+  link.click();
 }
 
-// ==== Permohonan Section ====
-let allPermohonanData=[];
-
-async function loadPermohonan(){
-  const tbody=document.getElementById('permohonanTable');
-  tbody.innerHTML='<tr><td colspan="6" class="loading">Memuatkan data...</td></tr>';
+let currentData = [];
+async function fetchData(){
   try{
-    allPermohonanData=[];
-    // Fetch 4 permohonan URLs
-    for(const url of SESSION_URLS.slice(1)){ // skip first QR URL
-      const res=await fetch(url);
-      if(!res.ok) throw new Error(res.status);
-      const data=await res.json();
-      if(Array.isArray(data)) allPermohonanData=allPermohonanData.concat(data);
-    }
-    displayPermohonan(allPermohonanData);
+    const res=await fetch('https://script.google.com/macros/s/AKfycbyLcDAFQTkRFcYqzN8H0P3JQKe_2KCM7_FKvWgZkYbnFg67Zc3e-UyItXBQHm-zPpNXKQ/exec?sheet=Permohonan');
+    currentData=await res.json();
+    displayTable(currentData);
   }catch(err){
-    tbody.innerHTML=`<tr><td colspan="6" class="loading">Ralat memuatkan data: ${err.message}</td></tr>`;
     console.error(err);
   }
 }
 
-function displayPermohonan(data){
-  const tbody=document.getElementById('permohonanTable');
-  if(data.length===0){tbody.innerHTML='<tr><td colspan="6" class="loading">Tiada permohonan ditemui.</td></tr>';return;}
-  tbody.innerHTML=data.map((r,i)=>{
-    return `<tr>
-      <td>${i+1}</td>
-      <td>${r.JenisPermohonan||'-'}</td>
-      <td>${r.Nama||'-'}</td>
-      <td>${r.Jabatan||'-'}</td>
-      <td>${r.Kuantiti||'-'}</td>
-      <td>${r.Timestamp||'-'}</td>
-    </tr>`;
-  }).join('');
+function displayTable(data){
+  const tableHeader=document.getElementById('tableHeader');
+  const tableBody=document.getElementById('tableBody');
+  tableHeader.innerHTML='';
+  tableBody.innerHTML='';
+  if(data.length===0) return;
+
+  // header
+  Object.keys(data[0]).forEach(h=>{
+    const th=document.createElement('th');
+    th.textContent=h;
+    tableHeader.appendChild(th);
+  });
+
+  // body
+  data.forEach(row=>{
+    const tr=document.createElement('tr');
+    Object.values(row).forEach(val=>{
+      const td=document.createElement('td');
+      td.textContent=val;
+      tr.appendChild(td);
+    });
+    tableBody.appendChild(tr);
+  });
+
+  // filter
+  const filter=document.getElementById('jenisFilter');
+  filter.addEventListener('change',()=>{
+    const value=filter.value;
+    Array.from(tableBody.querySelectorAll('tr')).forEach(tr=>{
+      if(!value || tr.cells[0].textContent===value){
+        tr.style.display='';
+      }else{
+        tr.style.display='none';
+      }
+    });
+  });
 }
 
-function applyFilter(){
-  const filterValue=document.getElementById('filterJenis').value;
-  if(filterValue==='all'){displayPermohonan(allPermohonanData);}
-  else{displayPermohonan(allPermohonanData.filter(r=>r.JenisPermohonan===filterValue));}
-}
+// Muat Turun PDF
+document.getElementById('downloadPDF').addEventListener('click',()=>{
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y = 10;
+  const filterValue = document.getElementById('jenisFilter').value;
+  const filtered = currentData.filter(r=>!filterValue || r["Jenis Permohonan"]===filterValue);
 
-// Initialize
-document.addEventListener('DOMContentLoaded',()=>{generateQRCodes();});
+  if(filtered.length===0){
+    alert("Tiada data untuk dijana PDF");
+    return;
+  }
+
+  // header
+  const headers = Object.keys(filtered[0]);
+  doc.setFontSize(14);
+  doc.text("Laporan Permohonan", 105, y, {align:"center"});
+  y += 10;
+
+  doc.setFontSize(10);
+  headers.forEach((h,i)=>{
+    doc.text(h, 10 + i*40, y);
+  });
+  y += 7;
+
+  filtered.forEach(row=>{
+    Object.values(row).forEach((val,i)=>{
+      doc.text(val.toString(), 10 + i*40, y);
+    });
+    y += 7;
+    if(y>280){doc.addPage();y=10;}
+  });
+
+  doc.save('Laporan_Permohonan.pdf');
+});
+
+generateQRCodes();
+fetchData();
 </script>
-
 </body>
 </html>
+
