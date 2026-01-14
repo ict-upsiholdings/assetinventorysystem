@@ -77,10 +77,10 @@ button.delete{background:#f87171;}
     <div class="filter-bar">
       <select id="filterJenis" onchange="applyFilter()">
         <option value="all">Semua Jenis</option>
-        <option value="Alat Tulis">Alat Tulis</option>
+        <option value="AlatTulis">AlatTulis</option>
         <option value="Kenderaan">Kenderaan</option>
         <option value="Projektor">Projektor</option>
-        <option value="Kertas A4">Kertas A4</option>
+        <option value="KertasA4">KertasA4</option>
       </select>
 
       <select id="filterBulan" onchange="applyFilter()">
@@ -131,7 +131,7 @@ button.delete{background:#f87171;}
         <p id="totalCount">0</p>
       </div>
       <div class="card">
-        <h2>Alat Tulis</h2>
+        <h2>AlatTulis</h2>
         <p id="alatCount">0</p>
       </div>
       <div class="card">
@@ -143,7 +143,7 @@ button.delete{background:#f87171;}
         <p id="projektorCount">0</p>
       </div>
       <div class="card">
-        <h2>Kertas A4</h2>
+        <h2>KertasA4</h2>
         <p id="kertasCount">0</p>
       </div>
     </div>
@@ -157,10 +157,10 @@ function logout(){sessionStorage.clear();location.href='adminlogin.html';}
 
 // ===== 4 URL QR =====
 const SESSION_URLS = [
-  { label:"Alat Tulis", url:"https://script.google.com/macros/s/AKfycbw9oPJKKqwhjLWJrVA2cMzKAp9W1eC1VUmfEXBv1vsZaPpbFAuh5nFZ7FnfvzBVDCnN/exec" },
+  { label:"AlatTulis", url:"https://script.google.com/macros/s/AKfycbw9oPJKKqwhjLWJrVA2cMzKAp9W1eC1VUmfEXBv1vsZaPpbFAuh5nFZ7FnfvzBVDCnN/exec" },
   { label:"Kenderaan", url:"https://script.google.com/macros/s/AKfycby1TDj5S6Bw4OoTFGcg6bkKGphIHak3PTYQAOUQnUJrcFBXwKrG8xRclA3BWAESOYM/exec" },
   { label:"Projektor", url:"https://script.google.com/macros/s/AKfycbz3Jk5o9vfJCXT6dmGqHxAQSc_gB0tmcCPOTNyF5EJ9dHDGhusLDu09rYDw4nudRpTb/exec" },
-  { label:"Kertas A4", url:"https://script.google.com/macros/s/AKfycbzcxX4CoQqEH-c--k8x_OJZccifA-gybXFI1sK5QvDCvkh9_K0QAq53R--32b9dmqQV/exec" }
+  { label:"KertasA4", url:"https://script.google.com/macros/s/AKfycbzcxX4CoQqEH-c--k8x_OJZccifA-gybXFI1sK5QvDCvkh9_K0QAq53R--32b9dmqQV/exec" }
 ];
 
 // ===== TAB =====
@@ -283,10 +283,10 @@ function exportExcel(){
 // ===== DASHBOARD =====
 function updateDashboard(){
   document.getElementById('totalCount').innerText=filteredData.length;
-  document.getElementById('alatCount').innerText=filteredData.filter(d=>d.JenisPermohonan==='Alat Tulis').length;
+  document.getElementById('alatCount').innerText=filteredData.filter(d=>d.JenisPermohonan==='AlatTulis').length;
   document.getElementById('kenderaanCount').innerText=filteredData.filter(d=>d.JenisPermohonan==='Kenderaan').length;
   document.getElementById('projektorCount').innerText=filteredData.filter(d=>d.JenisPermohonan==='Projektor').length;
-  document.getElementById('kertasCount').innerText=filteredData.filter(d=>d.JenisPermohonan==='Kertas A4').length;
+  document.getElementById('kertasCount').innerText=filteredData.filter(d=>d.JenisPermohonan==='KertasA4').length;
 }
 
 document.addEventListener('DOMContentLoaded',generateQRCodes);
@@ -294,3 +294,4 @@ document.addEventListener('DOMContentLoaded',generateQRCodes);
 
 </body>
 </html>
+
