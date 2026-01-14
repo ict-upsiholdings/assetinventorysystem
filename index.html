@@ -186,7 +186,7 @@ function setupAutocomplete(){
       d.innerHTML=highlight(item.Nama,q);
       d.onclick=()=>{
         nama.value=item.Nama;
-        jab.value=item.Jabatan || ''; // ✅ FIXED
+        jab.value = item.Jabatan || item.Dept || '';
         drop.classList.add('hidden');
       };
       drop.appendChild(d);
@@ -263,3 +263,4 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
 </body>
 </html>
+
