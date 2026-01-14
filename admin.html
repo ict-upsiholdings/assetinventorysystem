@@ -76,12 +76,29 @@ button.delete{background:#f87171;}
   <div id="dataSection" class="content-section">
     <div class="filter-bar">
       <select id="filterJenis" onchange="applyFilter()">
-        <option value="all">Semua</option>
+        <option value="all">Semua Jenis</option>
         <option value="Alat Tulis">Alat Tulis</option>
         <option value="Kenderaan">Kenderaan</option>
         <option value="Projektor">Projektor</option>
         <option value="Kertas A4">Kertas A4</option>
       </select>
+
+      <select id="filterBulan" onchange="applyFilter()">
+        <option value="all">Semua Bulan</option>
+        <option value="01">Januari</option>
+        <option value="02">Februari</option>
+        <option value="03">Mac</option>
+        <option value="04">April</option>
+        <option value="05">Mei</option>
+        <option value="06">Jun</option>
+        <option value="07">Julai</option>
+        <option value="08">Ogos</option>
+        <option value="09">September</option>
+        <option value="10">Oktober</option>
+        <option value="11">November</option>
+        <option value="12">Disember</option>
+      </select>
+
       <input type="text" id="searchInput" placeholder="Cari nama / jabatan" oninput="applyFilter()">
       <button class="download-btn" onclick="exportExcel()">Export Excel</button>
     </div>
@@ -171,6 +188,8 @@ function downloadQR(id,name){const canvas=document.querySelector(`#${id} canvas`
 
 // ===== DATA FULL =====
 let allData=[];
+let filteredData = [];
+
 async function loadData(){
   allData=[];
   const tbody=document.getElementById('dataTable');
@@ -186,10 +205,10 @@ async function loadData(){
       allData=allData.concat(rows);
     }catch(err){console.error('Fetch error:',item.label,err);}
   }
-  renderTable(allData);
-  updateDashboard();
+  applyFilter(); // render table + simpan filteredData
 }
 
+// ===== RENDER TABLE =====
 function renderTable(data){
   const tbody=document.getElementById('dataTable');
   if(!data.length){tbody.innerHTML='<tr><td colspan="8" class="loading">Tiada data</td></tr>';return;}
@@ -210,48 +229,64 @@ function renderTable(data){
     </tr>`).join('');
 }
 
-// ===== FILTER + SEARCH =====
+// ===== FILTER + SEARCH + BULAN =====
 function applyFilter(){
-  const jenis=document.getElementById('filterJenis').value.toLowerCase();
-  const search=document.getElementById('searchInput').value.toLowerCase();
-  const filtered=allData.filter(d=>{
-    const matchJenis=jenis==='all'||(d.JenisPermohonan||'').toLowerCase()===jenis;
-    const matchSearch=(d.Nama||'').toLowerCase().includes(search)||(d.Jabatan||'').toLowerCase().includes(search);
-    return matchJenis&&matchSearch;
+  const jenis = document.getElementById('filterJenis').value.toLowerCase();
+  const bulan = document.getElementById('filterBulan').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+
+  const filtered = allData.filter(d => {
+    const matchJenis = jenis === 'all' || (d.JenisPermohonan || '').toLowerCase() === jenis;
+    
+    let matchBulan = true;
+    if(bulan !== 'all' && d.Timestamp){
+      const bulanData = d.Timestamp.split('-')[1];
+      matchBulan = bulanData === bulan;
+    }
+
+    const matchSearch = (d.Nama || '').toLowerCase().includes(search) ||
+                        (d.Jabatan || '').toLowerCase().includes(search);
+
+    return matchJenis && matchBulan && matchSearch;
   });
+
   renderTable(filtered);
+  filteredData = filtered; // simpan untuk export Excel
+  updateDashboard();
 }
 
 // ===== STATUS CHANGE =====
 function changeStatus(index,status){
   allData[index].Status=status;
-  renderTable(allData);
-  updateDashboard();
+  applyFilter();
 }
 
 function deleteRow(index){
   if(confirm('Anda pasti mahu padam permohonan ini?')){
     allData.splice(index,1);
-    renderTable(allData);
-    updateDashboard();
+    applyFilter();
   }
 }
 
-// ===== EXPORT EXCEL =====
+// ===== EXPORT EXCEL (filtered data sahaja) =====
 function exportExcel(){
-  const ws=XLSX.utils.json_to_sheet(allData);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Permohonan');
-  XLSX.writeFile(wb,'Permohonan.xlsx');
+  if(!filteredData.length){
+    alert('Tiada data untuk dieksport!');
+    return;
+  }
+  const ws = XLSX.utils.json_to_sheet(filteredData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Permohonan');
+  XLSX.writeFile(wb, 'Permohonan.xlsx');
 }
 
 // ===== DASHBOARD =====
 function updateDashboard(){
-  document.getElementById('totalCount').innerText=allData.length;
-  document.getElementById('alatCount').innerText=allData.filter(d=>d.JenisPermohonan==='Alat Tulis').length;
-  document.getElementById('kenderaanCount').innerText=allData.filter(d=>d.JenisPermohonan==='Kenderaan').length;
-  document.getElementById('projektorCount').innerText=allData.filter(d=>d.JenisPermohonan==='Projektor').length;
-  document.getElementById('kertasCount').innerText=allData.filter(d=>d.JenisPermohonan==='Kertas A4').length;
+  document.getElementById('totalCount').innerText=filteredData.length;
+  document.getElementById('alatCount').innerText=filteredData.filter(d=>d.JenisPermohonan==='Alat Tulis').length;
+  document.getElementById('kenderaanCount').innerText=filteredData.filter(d=>d.JenisPermohonan==='Kenderaan').length;
+  document.getElementById('projektorCount').innerText=filteredData.filter(d=>d.JenisPermohonan==='Projektor').length;
+  document.getElementById('kertasCount').innerText=filteredData.filter(d=>d.JenisPermohonan==='Kertas A4').length;
 }
 
 document.addEventListener('DOMContentLoaded',generateQRCodes);
