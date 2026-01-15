@@ -202,6 +202,7 @@ function setupAutocomplete(){
   });
 }
 
+// --- Fields dependent on jenis ---
 const item = document.getElementById('item');
 const tempoh = document.getElementById('tempoh');
 const kuantiti = document.getElementById('kuantiti');
@@ -211,32 +212,44 @@ const jabatan = document.getElementById('jabatan');
 const timestamp = document.getElementById('timestamp');
 const submitBtn = document.getElementById('submitBtn');
 
-jenisSelect.addEventListener('change', function() {
+function updateFieldsByJenis(jenis){
   ['item','tempoh','kuantiti'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  item.value=''; tempoh.value=''; kuantiti.value='';
 
-  if(this.value === 'alat_tulis'){
+  if(jenis === 'alat_tulis'){
     item.placeholder = 'Jenis Alat';
     item.classList.remove('hidden');
     kuantiti.classList.remove('hidden');
   }
 
-  if(this.value === 'kenderaan'){
+  if(jenis === 'kenderaan'){
     item.placeholder = 'Jenis Kenderaan';
     item.classList.remove('hidden');
     tempoh.classList.remove('hidden');
   }
 
-  if(this.value === 'projektor'){
+  if(jenis === 'projektor'){
     item.placeholder = 'Bilangan Projektor';
     item.classList.remove('hidden');
     tempoh.classList.remove('hidden');
   }
 
-  if(this.value === 'kertas_a4'){
+  if(jenis === 'kertas_a4'){
     kuantiti.classList.remove('hidden');
   }
-});
+}
 
+jenisSelect.addEventListener('change',()=>updateFieldsByJenis(jenisSelect.value));
+
+// --- QR auto-set jenis dari URL ---
+const params = new URLSearchParams(window.location.search);
+const jenisParam = params.get('jenis'); // alat_tulis / kenderaan / projektor / kertas_a4
+if(jenisParam){
+  jenisSelect.value = jenisParam;
+  updateFieldsByJenis(jenisParam);
+}
+
+// --- Form submit ---
 document.getElementById('assetForm').addEventListener('submit', async e=>{
   e.preventDefault();
   const jenis = jenisSelect.value;
@@ -284,4 +297,3 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
 </body>
 </html>
-
