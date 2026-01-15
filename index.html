@@ -290,10 +290,17 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   
   // --- QR auto-set jenis dari URL ---
   const params = new URLSearchParams(window.location.search);
-  const jenisParam = params.get('jenis'); // alat_tulis / kenderaan / projektor / kertas_a4
+  let jenisParam = params.get('jenis'); // alat_tulis / kenderaan / projektor / kertas_a4
   
   console.log('URL params:', window.location.search);
-  console.log('jenisParam:', jenisParam);
+  console.log('jenisParam (original):', jenisParam);
+  
+  // Normalize parameter - convert to lowercase with underscore
+  if(jenisParam){
+    jenisParam = jenisParam.toLowerCase().replace(/\s+/g, '_');
+    console.log('jenisParam (normalized):', jenisParam);
+  }
+  
   console.log('jenisSelect.value BEFORE:', jenisSelect.value);
   
   if(jenisParam){
