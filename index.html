@@ -40,9 +40,19 @@ body{
 }
 .logo-container img{
   height:120px;
+  width:auto;
 }
-h1{text-align:center;margin-bottom:20px;color:var(--bg1);}
-label{font-weight:600;display:block;margin-top:12px;margin-bottom:4px;}
+h1{
+  text-align:center;
+  margin-bottom:20px;
+  color: var(--bg1);
+}
+label{
+  font-weight:600;
+  display:block;
+  margin-top:12px;
+  margin-bottom:4px;
+}
 input,select,button{
   width:100%;
   padding:10px;
@@ -60,6 +70,7 @@ button{
 }
 button:hover{opacity:.9}
 button:disabled{opacity:.6;cursor:not-allowed}
+
 .hidden{display:none}
 
 #nameDropdown{
@@ -72,10 +83,15 @@ button:disabled{opacity:.6;cursor:not-allowed}
   overflow-y:auto;
   border-radius:8px;
 }
-.name-option{padding:8px;cursor:pointer;}
+.name-option{
+  padding:8px;
+  cursor:pointer;
+}
 .name-option:hover{background:#eef6ff}
-.name-highlight{font-weight:bold;color:var(--bg2);}
-
+.name-highlight{
+  font-weight:bold;
+  color:var(--bg2);
+}
 .message{
   margin-top:12px;
   padding:10px;
@@ -91,60 +107,63 @@ button:disabled{opacity:.6;cursor:not-allowed}
 </head>
 
 <body>
+
 <div class="form-container">
 
-<div class="logo-container">
-<img src="Screenshot 2026-01-14 161757.png" alt="Logo">
-</div>
+  <div class="logo-container">
+    <img src="Screenshot 2026-01-14 161757.png" alt="Logo">
+  </div>
 
-<h1>Sistem Permohonan Aset</h1>
+  <h1>Sistem Permohonan Aset</h1>
 
-<form id="assetForm">
+  <form id="assetForm">
 
-<label>Nama <span style="color:red">*</span></label>
-<input type="text" id="namaInput" autocomplete="off" required>
-<div id="nameDropdown" class="hidden"></div>
+    <label>Nama <span style="color:red">*</span></label>
+    <input type="text" id="namaInput" placeholder="Taip untuk cari nama" autocomplete="off" required>
+    <div id="nameDropdown" class="hidden"></div>
 
-<label>Jabatan <span style="color:red">*</span></label>
-<input type="text" id="jabatan" required>
+    <label>Jabatan <span style="color:red">*</span></label>
+    <input type="text" id="jabatan" required>
 
-<label id="jenisLabel">Jenis Aset</label>
-<select id="jenisSelect">
-<option value="">-- Pilih --</option>
-<option value="alat_tulis">Alat Tulis</option>
-<option value="kenderaan">Kenderaan (Penggunaan)</option>
-<option value="permohonan_kenderaan">Kenderaan (Permohonan)</option>
-<option value="projektor">Projektor</option>
-</select>
+    <label id="jenisLabel">Jenis Aset</label>
+    <select id="jenisSelect">
+      <option value="">-- Pilih --</option>
+      <option value="alat_tulis">Alat Tulis</option>
+      <option value="kenderaan">Kenderaan (Penggunaan)</option>
+      <option value="permohonan_kenderaan">Kenderaan (Permohonan)</option>
+      <option value="projektor">Projektor</option>
+    </select>
 
-<!-- ALAT TULIS -->
-<input type="text" id="item" class="hidden" placeholder="Jenis Alat">
-<input type="number" id="kuantiti" class="hidden" placeholder="Kuantiti">
+    <!-- Alat Tulis -->
+    <input type="text" id="item" class="hidden" placeholder="">
+    <input type="number" id="kuantiti" class="hidden" placeholder="Kuantiti">
 
-<!-- KENDERAAN PENGGUNAAN -->
-<input type="text" id="jenisKenderaan" class="hidden" placeholder="Jenis Kenderaan">
-<input type="text" id="masa" class="hidden" placeholder="Masa">
-<input type="text" id="namaPemandu" class="hidden" placeholder="Nama Pemandu">
-<input type="text" id="lokasi" class="hidden" placeholder="Lokasi">
-<input type="text" id="tujuan" class="hidden" placeholder="Tujuan">
-<input type="number" id="bacaanOdo" class="hidden" placeholder="Bacaan Odometer (km)">
+     <!-- ── KENDERAAN PENGGUNAAN (ada odometer) ── -->
+    <input type="text"   id="jenisKenderaan" class="hidden" placeholder="Jenis Kenderaan">
+    <input type="text"   id="masa"           class="hidden" placeholder="Masa">
+    <input type="text"   id="namaPemandu"    class="hidden" placeholder="Nama Pemandu">
+    <input type="text"   id="lokasi"         class="hidden" placeholder="Lokasi">
+    <input type="text"   id="tujuan"         class="hidden" placeholder="Tujuan">
+    <input type="number" id="bacaanOdo"      class="hidden" placeholder="Bacaan Odometer (km)">
 
-<!-- PERMOHONAN KENDERAAN -->
-<input type="text" id="pgJenisKenderaan" class="hidden" placeholder="Jenis Kenderaan">
-<input type="text" id="pgNamaPemandu" class="hidden" placeholder="Nama Pemandu">
-<input type="text" id="pgLokasi" class="hidden" placeholder="Lokasi">
-<input type="text" id="pgTujuan" class="hidden" placeholder="Tujuan">
-<input type="date" id="pgTarikh" class="hidden">
-<input type="time" id="pgMasa" class="hidden">
+    <!-- ── PERMOHONAN KENDERAAN (tarikh+masa manual, TIADA odometer) ── -->
+    <input type="text" id="pgJenisKenderaan" class="hidden" placeholder="Jenis Kenderaan">
+    <input type="text" id="pgNamaPemandu"    class="hidden" placeholder="Nama Pemandu">
+    <input type="text" id="pgLokasi"         class="hidden" placeholder="Lokasi">
+    <input type="text" id="pgTujuan"         class="hidden" placeholder="Tujuan">
+    <input type="date" id="pgTarikh"         class="hidden">
+    <input type="time" id="pgMasa"           class="hidden">
 
-<!-- PROJEKTOR -->
-<input type="text" id="noProjektor" class="hidden" placeholder="No Projektor">
+    <!-- Projektor -->
+    <input type="text" id="noProjektor" class="hidden" placeholder="No Projektor">
 
-<input type="hidden" id="timestamp">
-<button type="submit" id="submitBtn">Hantar</button>
-</form>
+    <input type="hidden" id="timestamp">
 
-<div id="message" class="message"></div>
+    <button type="submit" id="submitBtn">Hantar</button>
+  </form>
+
+  <div id="message" class="message"></div>
+
 </div>
 
 <script>
@@ -157,161 +176,230 @@ const POST_API = {
 };
 let namesData=[];
 
-/* ================= LOAD NAMES ================= */
 async function loadNames(){
-try{
-const res=await fetch(NAMES_API);
-const data=await res.json();
-namesData=data.map(r=>{
-const o={};
-for(let k in r) o[k.trim()]=r[k];
-return o;
-});
-}catch(err){
-console.log('Gagal load nama');
-}
+  const res=await fetch(NAMES_API);
+  const data=await res.json();
+  namesData = data.map(r=>{
+    const o={};
+    for(let k in r) o[k.trim()]=r[k];
+    return o;
+  });
 }
 
-/* ================= AUTOCOMPLETE ================= */
+function highlight(text,term){
+  return text.replace(new RegExp(`(${term})`,'ig'),'<span class="name-highlight">$1</span>');
+}
+
 function setupAutocomplete(){
-const nama=document.getElementById('namaInput');
-const jab=document.getElementById('jabatan');
-const drop=document.getElementById('nameDropdown');
+  const nama=document.getElementById('namaInput');
+  const jab=document.getElementById('jabatan');
+  const drop=document.getElementById('nameDropdown');
 
-nama.addEventListener('input',()=>{
-const q=nama.value.trim().toLowerCase();
-if(!q){drop.classList.add('hidden');jab.value='';return;}
+  nama.addEventListener('input',()=>{
+    const q=nama.value.trim();
+    if(!q){drop.classList.add('hidden');jab.value='';return;}
+    const filtered=namesData.filter(x=>x.Nama.toLowerCase().includes(q.toLowerCase()));
+    drop.innerHTML='';
+    filtered.forEach(item=>{
+      const d=document.createElement('div');
+      d.className='name-option';
+      d.innerHTML=highlight(item.Nama,q);
+      d.onclick=()=>{
+        nama.value=item.Nama;
+        jab.value = item.Jabatan || item.Dept || '';
+        drop.classList.add('hidden');
+      };
+      drop.appendChild(d);
+    });
+    drop.classList.toggle('hidden',filtered.length===0);
+  });
 
-const filtered=namesData.filter(x=>
-(x.Nama||'').toLowerCase().includes(q)
-);
-
-drop.innerHTML='';
-filtered.forEach(item=>{
-const d=document.createElement('div');
-d.className='name-option';
-d.textContent=item.Nama;
-d.onclick=()=>{
-nama.value=item.Nama;
-jab.value=item.Jabatan||'';
-drop.classList.add('hidden');
-};
-drop.appendChild(d);
-});
-drop.classList.toggle('hidden',filtered.length===0);
-});
-
-document.addEventListener('click',e=>{
-if(!drop.contains(e.target)&&!nama.contains(e.target))
-drop.classList.add('hidden');
-});
+  document.addEventListener('click',e=>{
+    if(!drop.contains(e.target) && !nama.contains(e.target))
+      drop.classList.add('hidden');
+  });
 }
 
-/* ================= FIELD CONTROL ================= */
-function injectLabel(el,text){
-const lbl=document.createElement('label');
-lbl.textContent=text;
-lbl.setAttribute('data-dynamic','1');
-el.parentNode.insertBefore(lbl,el);
-}
+// --- Fields ---
+const item             = document.getElementById('item');
+const kuantiti         = document.getElementById('kuantiti');
+const jenisKenderaan   = document.getElementById('jenisKenderaan');
+const masa             = document.getElementById('masa');
+const namaPemandu      = document.getElementById('namaPemandu');
+const lokasi           = document.getElementById('lokasi');
+const tujuan           = document.getElementById('tujuan');
+const bacaanOdo        = document.getElementById('bacaanOdo');
+const noProjektor      = document.getElementById('noProjektor');
+const jenisSelect      = document.getElementById('jenisSelect');
+const namaInput        = document.getElementById('namaInput');
+const jabatan          = document.getElementById('jabatan');
+const timestamp        = document.getElementById('timestamp');
+const submitBtn        = document.getElementById('submitBtn');
+const jenisLabel       = document.getElementById('jenisLabel');
+const pgJenisKenderaan = document.getElementById('pgJenisKenderaan');
+const pgNamaPemandu    = document.getElementById('pgNamaPemandu');
+const pgLokasi         = document.getElementById('pgLokasi');
+const pgTujuan         = document.getElementById('pgTujuan');
+const pgTarikh         = document.getElementById('pgTarikh');
+const pgMasa           = document.getElementById('pgMasa');
 
+  // ── Show/hide fields ────────────────────────────────────────────────
 function updateFieldsByJenis(jenis){
-const all=document.querySelectorAll('#assetForm input');
-all.forEach(f=>{
-if(f.type!=='hidden') f.classList.add('hidden');
-});
-document.querySelectorAll('label[data-dynamic]').forEach(l=>l.remove());
+  const allFields = [
+    item, kuantiti,
+    jenisKenderaan, masa, namaPemandu, lokasi, tujuan, bacaanOdo,
+    pgJenisKenderaan, pgNamaPemandu, pgLokasi, pgTujuan, pgTarikh, pgMasa,
+    noProjektor
+  ];
+  allFields.forEach(f => { f.classList.add('hidden'); f.value = ''; });
+  document.querySelectorAll('label[data-dynamic]').forEach(l => l.remove());
 
-if(jenis==='alat_tulis'){
-item.classList.remove('hidden');
-kuantiti.classList.remove('hidden');
-injectLabel(item,'Jenis Alat');
-injectLabel(kuantiti,'Kuantiti');
+  if(jenis === 'alat_tulis'){
+    item.classList.remove('hidden');
+    kuantiti.classList.remove('hidden');
+  }
+
+  if(jenis === 'kenderaan'){
+    // Kenderaan Penggunaan — ada odometer + masa teks bebas
+    jenisKenderaan.classList.remove('hidden');
+    masa.classList.remove('hidden');
+    namaPemandu.classList.remove('hidden');
+    lokasi.classList.remove('hidden');
+    tujuan.classList.remove('hidden');
+    bacaanOdo.classList.remove('hidden');
+  }
+
+  if(jenis === 'permohonan_kenderaan'){
+    // Permohonan Kenderaan — tarikh+masa manual, TIADA odometer
+    injectLabel(pgJenisKenderaan, 'Jenis Kenderaan');
+    pgJenisKenderaan.classList.remove('hidden');
+
+    injectLabel(pgNamaPemandu, 'Nama Pemandu');
+    pgNamaPemandu.classList.remove('hidden');
+
+    injectLabel(pgLokasi, 'Lokasi');
+    pgLokasi.classList.remove('hidden');
+
+    injectLabel(pgTujuan, 'Tujuan');
+    pgTujuan.classList.remove('hidden');
+
+    injectLabel(pgTarikh, 'Tarikh');
+    pgTarikh.classList.remove('hidden');
+
+    injectLabel(pgMasa, 'Masa');
+    pgMasa.classList.remove('hidden');
+  }
+
+  if(jenis === 'projektor'){
+    noProjektor.classList.remove('hidden');
+  }
 }
 
-if(jenis==='kenderaan'){
-[jenisKenderaan,masa,namaPemandu,lokasi,tujuan,bacaanOdo].forEach(f=>{
-f.classList.remove('hidden');
-});
-injectLabel(jenisKenderaan,'Jenis Kenderaan');
-injectLabel(masa,'Masa');
-injectLabel(namaPemandu,'Nama Pemandu');
-injectLabel(lokasi,'Lokasi');
-injectLabel(tujuan,'Tujuan');
-injectLabel(bacaanOdo,'Bacaan Odometer');
+function injectLabel(el, text){
+  const lbl = document.createElement('label');
+  lbl.textContent = text;
+  lbl.setAttribute('data-dynamic', '1');
+  el.parentNode.insertBefore(lbl, el);
 }
 
-if(jenis==='permohonan_kenderaan'){
-[pgJenisKenderaan,pgNamaPemandu,pgLokasi,pgTujuan,pgTarikh,pgMasa].forEach(f=>{
-f.classList.remove('hidden');
-});
-injectLabel(pgJenisKenderaan,'Jenis Kenderaan');
-injectLabel(pgNamaPemandu,'Nama Pemandu');
-injectLabel(pgLokasi,'Lokasi');
-injectLabel(pgTujuan,'Tujuan');
-injectLabel(pgTarikh,'Tarikh');
-injectLabel(pgMasa,'Masa');
-}
+jenisSelect.addEventListener('change', function(){ updateFieldsByJenis(this.value); });
+  
+// --- Form submit ---
+document.getElementById('assetForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const jenis = jenisSelect.value;
+  if(!jenis) return showMessage('Sila pilih jenis aset','warning');
+  submitBtn.disabled = true;
+  timestamp.value = new Date().toLocaleString('ms-MY');
+  
+  let data = {
+    nama: namaInput.value,
+    jabatan: jabatan.value,
+    timestamp: timestamp.value
+  };
 
-if(jenis==='projektor'){
-noProjektor.classList.remove('hidden');
-injectLabel(noProjektor,'No Projektor');
-}
-}
+  // Build data based on jenis
+   if(jenis === 'alat_tulis'){
+    data.jenis_alatan = item.value     || '-';
+    data.kuantiti     = kuantiti.value || '-';
 
-jenisSelect.addEventListener('change',function(){
-updateFieldsByJenis(this.value);
-});
+  } else if(jenis === 'kenderaan'){
+    data.jenis_kenderaan  = jenisKenderaan.value || '-';
+    data.masa             = masa.value           || '-';
+    data.nama_pemandu     = namaPemandu.value    || '-';
+    data.lokasi           = lokasi.value         || '-';
+    data.tujuan           = tujuan.value         || '-';
+    data.bacaan_odometer  = bacaanOdo.value      || '-';
 
-/* ================= SUBMIT ================= */
-document.getElementById('assetForm').addEventListener('submit',async e=>{
-e.preventDefault();
-const jenis=jenisSelect.value;
-if(!jenis) return showMessage('Sila pilih jenis aset','warning');
+  } else if(jenis === 'permohonan_kenderaan'){
+    // ✅ TIADA bacaan_odometer
+    data.jenis_kenderaan  = pgJenisKenderaan.value || '-';
+    data.nama_pemandu     = pgNamaPemandu.value    || '-';
+    data.lokasi           = pgLokasi.value         || '-';
+    data.tujuan           = pgTujuan.value         || '-';
+    data.tarikh           = pgTarikh.value         || '-';
+    data.masa             = pgMasa.value           || '-';
+    data.jenis_permohonan = 'PermohonanKenderaan2026';
 
-submitBtn.disabled=true;
-timestamp.value=new Date().toLocaleString('ms-MY');
+  } else if(jenis === 'projektor'){
+    data.no_projektor = noProjektor.value || '-';
+  }
 
-let data={
-nama:namaInput.value,
-jabatan:jabatan.value,
-timestamp:timestamp.value
-};
-
-try{
-const res=await fetch(POST_API[jenis],{
-method:'POST',
-headers:{'Content-Type':'application/x-www-form-urlencoded'},
-body:new URLSearchParams({data:JSON.stringify(data)})
-});
-const r=await res.json();
-
-if(r.status==='success'){
-showMessage('✓ Permohonan berjaya','success');
-e.target.reset();
-updateFieldsByJenis('');
-}else{
-showMessage('✗ Gagal hantar','error');
-}
-}catch(err){
-showMessage('Server error','error');
-}
-
-submitBtn.disabled=false;
+ try {
+  const res = await fetch(POST_API[jenis], {
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({data: JSON.stringify(data)})
+  });
+  const r = await res.json();
+  r.status==='success'
+    ? showMessage('✓ Permohonan berjaya','success')
+    : showMessage('✗ Gagal hantar','error');
+  submitBtn.disabled = false;
+  e.target.reset();
+   updateFieldsByJenis('');
 });
 
 function showMessage(msg,type){
-const el=document.getElementById('message');
-el.textContent=msg;
-el.className=`message ${type}`;
-el.style.display='block';
-if(type==='success') setTimeout(()=>el.style.display='none',5000);
+  const el=document.getElementById('message');
+  el.textContent=msg;
+  el.className=`message ${type}`;
+  el.style.display='block';
+  if(type==='success') setTimeout(()=>el.style.display='none',5000);
 }
 
-/* ================= INIT ================= */
-document.addEventListener('DOMContentLoaded',async()=>{
-await loadNames();
-setupAutocomplete();
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await loadNames();
+  setupAutocomplete();
+  
+  // --- QR auto-set jenis dari URL ---
+  const params = new URLSearchParams(window.location.search);
+  let jenisParam = params.get('jenis');
+  
+  // Flexible mapping
+   const jenisMap = {
+    'AlatTulis':               'alat_tulis',
+    'AlatTulis2026':           'alat_tulis',
+    'Kenderaan':               'kenderaan',
+    'Kenderaan2026':           'kenderaan',
+    'PermohonanKenderaan':     'permohonan_kenderaan',
+    'PermohonanKenderaan2026': 'permohonan_kenderaan',
+    'Projektor':               'projektor',
+    'Projektor2026':           'projektor',
+  };
+
+  const mappedJenis = jenisParam ? (jenisMap[jenisParam] || '') : '';
+
+  if(mappedJenis){
+    jenisSelect.value                = mappedJenis;
+    updateFieldsByJenis(mappedJenis);
+    jenisSelect.disabled             = true;
+    jenisSelect.style.pointerEvents  = 'none';
+    jenisSelect.style.opacity        = '0.6';
+    jenisSelect.style.backgroundColor = '#e5e7eb';
+    jenisLabel.textContent           = 'Jenis Aset: ' + jenisParam;
+    jenisLabel.style.color           = '#059669';
+  }
 });
 </script>
 
