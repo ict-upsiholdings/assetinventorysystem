@@ -82,6 +82,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
   max-height:180px;
   overflow-y:auto;
   border-radius:8px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
 }
 .name-option{
   padding:8px;
@@ -103,6 +104,13 @@ button:disabled{opacity:.6;cursor:not-allowed}
 .success{background:#D1FAE5;color:#065F46}
 .error{background:#FEE2E2;color:#991B1B}
 .warning{background:#FEF3C7;color:#92400E}
+
+/* Loading spinner untuk nama */
+.nama-wrap{position:relative;}
+.nama-loading{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  font-size:12px;color:var(--muted);
+}
 </style>
 </head>
 
@@ -114,18 +122,22 @@ button:disabled{opacity:.6;cursor:not-allowed}
     <img src="Screenshot 2026-01-14 161757.png" alt="Logo">
   </div>
 
-  <h1>Sistem Permohonan Aset</h1>
+  <h1 id="formTitle">Sistem Permohonan Aset</h1>
 
   <form id="assetForm">
 
     <label>Nama <span style="color:red">*</span></label>
-    <input type="text" id="namaInput" placeholder="Taip untuk cari nama" autocomplete="off" required>
+    <div class="nama-wrap">
+      <input type="text" id="namaInput" placeholder="Taip untuk cari nama..." autocomplete="off" required>
+      <span class="nama-loading" id="namaLoading">⏳ Memuatkan...</span>
+    </div>
     <div id="nameDropdown" class="hidden"></div>
 
     <label>Jabatan <span style="color:red">*</span></label>
-    <input type="text" id="jabatan" required>
+    <input type="text" id="jabatan" placeholder="Auto-isi bila pilih nama" required readonly
+      style="background:#f0f4ff;cursor:not-allowed;">
 
-    <label id="jenisLabel">Jenis Aset</label>
+    <label id="jenisLabel">Jenis Aset <span style="color:red">*</span></label>
     <select id="jenisSelect">
       <option value="">-- Pilih --</option>
       <option value="alat_tulis">Alat Tulis</option>
@@ -135,27 +147,72 @@ button:disabled{opacity:.6;cursor:not-allowed}
     </select>
 
     <!-- Alat Tulis -->
-    <input type="text" id="item" class="hidden" placeholder="">
-    <input type="number" id="kuantiti" class="hidden" placeholder="Kuantiti">
+    <div id="wrap_item" class="hidden">
+      <label data-dynamic="1">Jenis Alatan</label>
+      <input type="text" id="item" placeholder="Contoh: Pen, Kertas A4...">
+    </div>
+    <div id="wrap_kuantiti" class="hidden">
+      <label data-dynamic="1">Kuantiti</label>
+      <input type="number" id="kuantiti" placeholder="Kuantiti" min="1">
+    </div>
 
-     <!-- ── KENDERAAN PENGGUNAAN (ada odometer) ── -->
-    <input type="text"   id="jenisKenderaan" class="hidden" placeholder="Jenis Kenderaan">
-    <input type="text"   id="masa"           class="hidden" placeholder="Masa">
-    <input type="text"   id="namaPemandu"    class="hidden" placeholder="Nama Pemandu">
-    <input type="text"   id="lokasi"         class="hidden" placeholder="Lokasi">
-    <input type="text"   id="tujuan"         class="hidden" placeholder="Tujuan">
-    <input type="number" id="bacaanOdo"      class="hidden" placeholder="Bacaan Odometer (km)">
+    <!-- Kenderaan Penggunaan -->
+    <div id="wrap_jenisKenderaan" class="hidden">
+      <label data-dynamic="1">Jenis Kenderaan</label>
+      <input type="text" id="jenisKenderaan" placeholder="Contoh: Proton Wira ABC1234">
+    </div>
+    <div id="wrap_masa" class="hidden">
+      <label data-dynamic="1">Masa</label>
+      <input type="time" id="masa">
+    </div>
+    <div id="wrap_namaPemandu" class="hidden">
+      <label data-dynamic="1">Nama Pemandu</label>
+      <input type="text" id="namaPemandu" placeholder="Nama Pemandu">
+    </div>
+    <div id="wrap_lokasi" class="hidden">
+      <label data-dynamic="1">Lokasi</label>
+      <input type="text" id="lokasi" placeholder="Lokasi">
+    </div>
+    <div id="wrap_tujuan" class="hidden">
+      <label data-dynamic="1">Tujuan</label>
+      <input type="text" id="tujuan" placeholder="Tujuan">
+    </div>
+    <div id="wrap_bacaanOdo" class="hidden">
+      <label data-dynamic="1">Bacaan Odometer (km)</label>
+      <input type="number" id="bacaanOdo" placeholder="Bacaan Odometer (km)">
+    </div>
 
-    <!-- ── PERMOHONAN KENDERAAN (tarikh+masa manual, TIADA odometer) ── -->
-    <input type="text" id="pgJenisKenderaan" class="hidden" placeholder="Jenis Kenderaan">
-    <input type="text" id="pgNamaPemandu"    class="hidden" placeholder="Nama Pemandu">
-    <input type="text" id="pgLokasi"         class="hidden" placeholder="Lokasi">
-    <input type="text" id="pgTujuan"         class="hidden" placeholder="Tujuan">
-    <input type="date" id="pgTarikh"         class="hidden">
-    <input type="time" id="pgMasa"           class="hidden">
+    <!-- Permohonan Kenderaan -->
+    <div id="wrap_pgJenisKenderaan" class="hidden">
+      <label data-dynamic="1">Jenis Kenderaan</label>
+      <input type="text" id="pgJenisKenderaan" placeholder="Contoh: Proton Wira ABC1234">
+    </div>
+    <div id="wrap_pgNamaPemandu" class="hidden">
+      <label data-dynamic="1">Nama Pemandu</label>
+      <input type="text" id="pgNamaPemandu" placeholder="Nama Pemandu">
+    </div>
+    <div id="wrap_pgLokasi" class="hidden">
+      <label data-dynamic="1">Lokasi</label>
+      <input type="text" id="pgLokasi" placeholder="Lokasi">
+    </div>
+    <div id="wrap_pgTujuan" class="hidden">
+      <label data-dynamic="1">Tujuan</label>
+      <input type="text" id="pgTujuan" placeholder="Tujuan">
+    </div>
+    <div id="wrap_pgTarikh" class="hidden">
+      <label data-dynamic="1">Tarikh</label>
+      <input type="date" id="pgTarikh">
+    </div>
+    <div id="wrap_pgMasa" class="hidden">
+      <label data-dynamic="1">Masa</label>
+      <input type="time" id="pgMasa">
+    </div>
 
     <!-- Projektor -->
-    <input type="text" id="noProjektor" class="hidden" placeholder="No Projektor">
+    <div id="wrap_noProjektor" class="hidden">
+      <label data-dynamic="1">No Projektor</label>
+      <input type="text" id="noProjektor" placeholder="No Projektor">
+    </div>
 
     <input type="hidden" id="timestamp">
 
@@ -169,238 +226,276 @@ button:disabled{opacity:.6;cursor:not-allowed}
 <script>
 const NAMES_API = 'https://script.google.com/macros/s/AKfycbx6kMJIKKJOj3wOE71pALIxQxT0gTI9khFoTjNH8BSiSxVEhn4QiMpFpPXbUX8SrQDiXg/exec';
 const POST_API = {
-  alat_tulis:"https://script.google.com/macros/s/AKfycbwBQtsg3QjNGMM8z3wZw61VS0jkGKP2BHc6j2Du7HklazaiqGEemal1JvwPJ-7EzBTLLQ/exec",
-  kenderaan:"https://script.google.com/macros/s/AKfycbxvMxEIGXqZA8mlgYLsMFgYkNNFekaqOAhucDPfNhlsZwTj5P-470ar73BaQSo_AnsO4w/exec",
-  permohonan_kenderaan: "https://script.google.com/macros/s/AKfycbz_c5RZw95VBrvOFxxudm7CsIAO-d-GdzUYtJEwR98OLlhXi5O7s2V-ioRbhJjwZ1Fu1Q/exec",
-  projektor:"https://script.google.com/macros/s/AKfycbw3pI9-V5RT_38OuIMddcCsJeKtWh7n3Z6Z2pQWfTpbG20Boavt2ZkKS0Uz4fRH0cYW/exec"
+  alat_tulis:            "https://script.google.com/macros/s/AKfycbwBQtsg3QjNGMM8z3wZw61VS0jkGKP2BHc6j2Du7HklazaiqGEemal1JvwPJ-7EzBTLLQ/exec",
+  kenderaan:             "https://script.google.com/macros/s/AKfycbxvMxEIGXqZA8mlgYLsMFgYkNNFekaqOAhucDPfNhlsZwTj5P-470ar73BaQSo_AnsO4w/exec",
+  permohonan_kenderaan:  "https://script.google.com/macros/s/AKfycbz_c5RZw95VBrvOFxxudm7CsIAO-d-GdzUYtJEwR98OLlhXi5O7s2V-ioRbhJjwZ1Fu1Q/exec",
+  projektor:             "https://script.google.com/macros/s/AKfycbw3pI9-V5RT_38OuIMddcCsJeKtWh7n3Z6Z2pQWfTpbG20Boavt2ZkKS0Uz4fRH0cYW/exec"
 };
-let namesData=[];
 
+const jenisMap = {
+  'AlatTulis':               'alat_tulis',
+  'AlatTulis2026':           'alat_tulis',
+  'Kenderaan':               'kenderaan',
+  'Kenderaan2026':           'kenderaan',
+  'PermohonanKenderaan':     'permohonan_kenderaan',
+  'PermohonanKenderaan2026': 'permohonan_kenderaan',
+  'Projektor':               'projektor',
+  'Projektor2026':           'projektor',
+};
+
+const jenisNama = {
+  'alat_tulis':           'Alat Tulis',
+  'kenderaan':            'Kenderaan (Penggunaan)',
+  'permohonan_kenderaan': 'Kenderaan (Permohonan)',
+  'projektor':            'Projektor',
+};
+
+let namesData = [];
+
+/* ── Load senarai nama ── */
 async function loadNames(){
-  const res=await fetch(NAMES_API);
-  const data=await res.json();
-  namesData = data.map(r=>{
-    const o={};
-    for(let k in r) o[k.trim()]=r[k];
-    return o;
-  });
+  try {
+    const res  = await fetch(NAMES_API);
+    const data = await res.json();
+    namesData  = data.map(r => {
+      const o = {};
+      for(let k in r) o[k.trim()] = r[k];
+      return o;
+    });
+  } catch(e) {
+    console.warn('Gagal load nama:', e);
+  } finally {
+    document.getElementById('namaLoading').style.display = 'none';
+    document.getElementById('namaInput').placeholder = namesData.length
+      ? 'Taip untuk cari nama...'
+      : 'Taip nama anda...';
+    // Kalau nama kosong, benarkan taip sendiri
+    if(!namesData.length) {
+      document.getElementById('jabatan').removeAttribute('readonly');
+      document.getElementById('jabatan').style.background = '';
+      document.getElementById('jabatan').style.cursor = '';
+      document.getElementById('jabatan').placeholder = 'Taip jabatan anda...';
+    }
+  }
 }
 
-function highlight(text,term){
-  return text.replace(new RegExp(`(${term})`,'ig'),'<span class="name-highlight">$1</span>');
+/* ── Highlight carian ── */
+function highlight(text, term){
+  return text.replace(new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'ig'),
+    '<span class="name-highlight">$1</span>');
 }
 
+/* ── Autocomplete nama ── */
 function setupAutocomplete(){
-  const nama=document.getElementById('namaInput');
-  const jab=document.getElementById('jabatan');
-  const drop=document.getElementById('nameDropdown');
+  const nama = document.getElementById('namaInput');
+  const jab  = document.getElementById('jabatan');
+  const drop = document.getElementById('nameDropdown');
 
-  nama.addEventListener('input',()=>{
-    const q=nama.value.trim();
-    if(!q){drop.classList.add('hidden');jab.value='';return;}
-    const filtered=namesData.filter(x=>x.Nama.toLowerCase().includes(q.toLowerCase()));
-    drop.innerHTML='';
-    filtered.forEach(item=>{
-      const d=document.createElement('div');
-      d.className='name-option';
-      d.innerHTML=highlight(item.Nama,q);
-      d.onclick=()=>{
-        nama.value=item.Nama;
-        jab.value = item.Jabatan || item.Dept || '';
+  nama.addEventListener('input', () => {
+    const q = nama.value.trim();
+    if(!q || !namesData.length){ drop.classList.add('hidden'); return; }
+
+    const filtered = namesData.filter(x =>
+      (x.Nama||'').toLowerCase().includes(q.toLowerCase())
+    ).slice(0, 20); // hadkan 20 result
+
+    drop.innerHTML = '';
+    if(!filtered.length){ drop.classList.add('hidden'); return; }
+
+    filtered.forEach(item => {
+      const d = document.createElement('div');
+      d.className = 'name-option';
+      d.innerHTML = highlight(item.Nama, q) +
+        (item.Jabatan||item.Dept
+          ? `<br><small style="color:#6b7280">${item.Jabatan||item.Dept}</small>`
+          : '');
+      d.onclick = () => {
+        nama.value = item.Nama;
+        jab.value  = item.Jabatan || item.Dept || '';
         drop.classList.add('hidden');
       };
       drop.appendChild(d);
     });
-    drop.classList.toggle('hidden',filtered.length===0);
+    drop.classList.remove('hidden');
   });
 
-  document.addEventListener('click',e=>{
+  document.addEventListener('click', e => {
     if(!drop.contains(e.target) && !nama.contains(e.target))
       drop.classList.add('hidden');
   });
 }
 
-// --- Fields ---
-const item             = document.getElementById('item');
-const kuantiti         = document.getElementById('kuantiti');
-const jenisKenderaan   = document.getElementById('jenisKenderaan');
-const masa             = document.getElementById('masa');
-const namaPemandu      = document.getElementById('namaPemandu');
-const lokasi           = document.getElementById('lokasi');
-const tujuan           = document.getElementById('tujuan');
-const bacaanOdo        = document.getElementById('bacaanOdo');
-const noProjektor      = document.getElementById('noProjektor');
-const jenisSelect      = document.getElementById('jenisSelect');
-const namaInput        = document.getElementById('namaInput');
-const jabatan          = document.getElementById('jabatan');
-const timestamp        = document.getElementById('timestamp');
-const submitBtn        = document.getElementById('submitBtn');
-const jenisLabel       = document.getElementById('jenisLabel');
-const pgJenisKenderaan = document.getElementById('pgJenisKenderaan');
-const pgNamaPemandu    = document.getElementById('pgNamaPemandu');
-const pgLokasi         = document.getElementById('pgLokasi');
-const pgTujuan         = document.getElementById('pgTujuan');
-const pgTarikh         = document.getElementById('pgTarikh');
-const pgMasa           = document.getElementById('pgMasa');
+/* ── Show/hide fields ikut jenis ── */
+const allWraps = [
+  'wrap_item','wrap_kuantiti',
+  'wrap_jenisKenderaan','wrap_masa','wrap_namaPemandu','wrap_lokasi','wrap_tujuan','wrap_bacaanOdo',
+  'wrap_pgJenisKenderaan','wrap_pgNamaPemandu','wrap_pgLokasi','wrap_pgTujuan','wrap_pgTarikh','wrap_pgMasa',
+  'wrap_noProjektor'
+];
 
-  // ── Show/hide fields ────────────────────────────────────────────────
 function updateFieldsByJenis(jenis){
-  const allFields = [
-    item, kuantiti,
-    jenisKenderaan, masa, namaPemandu, lokasi, tujuan, bacaanOdo,
-    pgJenisKenderaan, pgNamaPemandu, pgLokasi, pgTujuan, pgTarikh, pgMasa,
-    noProjektor
-  ];
-  allFields.forEach(f => { f.classList.add('hidden'); f.value = ''; });
-  document.querySelectorAll('label[data-dynamic]').forEach(l => l.remove());
+  allWraps.forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.classList.add('hidden'); }
+    // reset value
+    const input = el ? el.querySelector('input,select') : null;
+    if(input) input.value = '';
+  });
 
   if(jenis === 'alat_tulis'){
-    item.classList.remove('hidden');
-    kuantiti.classList.remove('hidden');
+    show('wrap_item');
+    show('wrap_kuantiti');
   }
-
   if(jenis === 'kenderaan'){
-    // Kenderaan Penggunaan — ada odometer + masa teks bebas
-    jenisKenderaan.classList.remove('hidden');
-    masa.classList.remove('hidden');
-    namaPemandu.classList.remove('hidden');
-    lokasi.classList.remove('hidden');
-    tujuan.classList.remove('hidden');
-    bacaanOdo.classList.remove('hidden');
+    show('wrap_jenisKenderaan');
+    show('wrap_masa');
+    show('wrap_namaPemandu');
+    show('wrap_lokasi');
+    show('wrap_tujuan');
+    show('wrap_bacaanOdo');
   }
-
   if(jenis === 'permohonan_kenderaan'){
-    // Permohonan Kenderaan — tarikh+masa manual, TIADA odometer
-    injectLabel(pgJenisKenderaan, 'Jenis Kenderaan');
-    pgJenisKenderaan.classList.remove('hidden');
-
-    injectLabel(pgNamaPemandu, 'Nama Pemandu');
-    pgNamaPemandu.classList.remove('hidden');
-
-    injectLabel(pgLokasi, 'Lokasi');
-    pgLokasi.classList.remove('hidden');
-
-    injectLabel(pgTujuan, 'Tujuan');
-    pgTujuan.classList.remove('hidden');
-
-    injectLabel(pgTarikh, 'Tarikh');
-    pgTarikh.classList.remove('hidden');
-
-    injectLabel(pgMasa, 'Masa');
-    pgMasa.classList.remove('hidden');
+    show('wrap_pgJenisKenderaan');
+    show('wrap_pgNamaPemandu');
+    show('wrap_pgLokasi');
+    show('wrap_pgTujuan');
+    show('wrap_pgTarikh');
+    show('wrap_pgMasa');
   }
-
   if(jenis === 'projektor'){
-    noProjektor.classList.remove('hidden');
+    show('wrap_noProjektor');
   }
 }
 
-function injectLabel(el, text){
-  const lbl = document.createElement('label');
-  lbl.textContent = text;
-  lbl.setAttribute('data-dynamic', '1');
-  el.parentNode.insertBefore(lbl, el);
+function show(id){
+  const el = document.getElementById(id);
+  if(el) el.classList.remove('hidden');
 }
 
-jenisSelect.addEventListener('change', function(){ updateFieldsByJenis(this.value); });
-  
-// --- Form submit ---
-document.getElementById('assetForm').addEventListener('submit', async e=>{
-  e.preventDefault();
-  const jenis = jenisSelect.value;
-  if(!jenis) return showMessage('Sila pilih jenis aset','warning');
-  submitBtn.disabled = true;
-  timestamp.value = new Date().toLocaleString('ms-MY');
-  
-  let data = {
-    nama: namaInput.value,
-    jabatan: jabatan.value,
-    timestamp: timestamp.value
-  };
-
-  // Build data based on jenis
-   if(jenis === 'alat_tulis'){
-    data.jenis_alatan = item.value     || '-';
-    data.kuantiti     = kuantiti.value || '-';
-
-  } else if(jenis === 'kenderaan'){
-    data.jenis_kenderaan  = jenisKenderaan.value || '-';
-    data.masa             = masa.value           || '-';
-    data.nama_pemandu     = namaPemandu.value    || '-';
-    data.lokasi           = lokasi.value         || '-';
-    data.tujuan           = tujuan.value         || '-';
-    data.bacaan_odometer  = bacaanOdo.value      || '-';
-
-  } else if(jenis === 'permohonan_kenderaan'){
-    // ✅ TIADA bacaan_odometer
-    data.jenis_kenderaan  = pgJenisKenderaan.value || '-';
-    data.nama_pemandu     = pgNamaPemandu.value    || '-';
-    data.lokasi           = pgLokasi.value         || '-';
-    data.tujuan           = pgTujuan.value         || '-';
-    data.tarikh           = pgTarikh.value         || '-';
-    data.masa             = pgMasa.value           || '-';
-    data.jenis_permohonan = 'PermohonanKenderaan2026';
-
-  } else if(jenis === 'projektor'){
-    data.no_projektor = noProjektor.value || '-';
-  }
-
- try {
-  const res = await fetch(POST_API[jenis], {
-    method:'POST',
-    headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:new URLSearchParams({data: JSON.stringify(data)})
-  });
-  const r = await res.json();
-  r.status==='success'
-    ? showMessage('✓ Permohonan berjaya','success')
-    : showMessage('✗ Gagal hantar','error');
-  submitBtn.disabled = false;
-  e.target.reset();
-   updateFieldsByJenis('');
+document.getElementById('jenisSelect').addEventListener('change', function(){
+  updateFieldsByJenis(this.value);
 });
 
-function showMessage(msg,type){
-  const el=document.getElementById('message');
-  el.textContent=msg;
-  el.className=`message ${type}`;
-  el.style.display='block';
-  if(type==='success') setTimeout(()=>el.style.display='none',5000);
+/* ── Format masa 24 jam untuk simpan ── */
+function formatTime24(timeVal){
+  if(!timeVal) return '-';
+  // input type="time" sudah dalam format HH:MM (24 jam)
+  return timeVal;
 }
 
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await loadNames();
-  setupAutocomplete();
-  
-  // --- QR auto-set jenis dari URL ---
-  const params = new URLSearchParams(window.location.search);
-  let jenisParam = params.get('jenis');
-  
-  // Flexible mapping
-   const jenisMap = {
-    'AlatTulis':               'alat_tulis',
-    'AlatTulis2026':           'alat_tulis',
-    'Kenderaan':               'kenderaan',
-    'Kenderaan2026':           'kenderaan',
-    'PermohonanKenderaan':     'permohonan_kenderaan',
-    'PermohonanKenderaan2026': 'permohonan_kenderaan',
-    'Projektor':               'projektor',
-    'Projektor2026':           'projektor',
+/* ── Submit form ── */
+document.getElementById('assetForm').addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const jenis = document.getElementById('jenisSelect').value;
+  if(!jenis) return showMessage('Sila pilih jenis aset', 'warning');
+
+  const namaVal = document.getElementById('namaInput').value.trim();
+  const jabVal  = document.getElementById('jabatan').value.trim();
+  if(!namaVal) return showMessage('Sila masukkan nama', 'warning');
+  if(!jabVal)  return showMessage('Sila masukkan jabatan', 'warning');
+
+  submitBtn.disabled = true;
+  document.getElementById('timestamp').value = new Date().toISOString();
+
+  let data = {
+    Nama:      namaVal,
+    Jabatan:   jabVal,
+    Timestamp: new Date().toISOString()
   };
 
+  if(jenis === 'alat_tulis'){
+    data['Jenis Alatan'] = document.getElementById('item').value     || '-';
+    data['Kuantiti']     = document.getElementById('kuantiti').value || '-';
+
+  } else if(jenis === 'kenderaan'){
+    data['Jenis Kenderaan'] = document.getElementById('jenisKenderaan').value || '-';
+    data['Masa']            = formatTime24(document.getElementById('masa').value);
+    data['Nama Pemandu']    = document.getElementById('namaPemandu').value    || '-';
+    data['Lokasi']          = document.getElementById('lokasi').value         || '-';
+    data['Tujuan']          = document.getElementById('tujuan').value         || '-';
+    data['Bacaan Odometer'] = document.getElementById('bacaanOdo').value      || '-';
+
+  } else if(jenis === 'permohonan_kenderaan'){
+    data['Jenis Kenderaan'] = document.getElementById('pgJenisKenderaan').value || '-';
+    data['Nama Pemandu']    = document.getElementById('pgNamaPemandu').value    || '-';
+    data['Lokasi']          = document.getElementById('pgLokasi').value         || '-';
+    data['Tujuan']          = document.getElementById('pgTujuan').value         || '-';
+    data['Tarikh']          = document.getElementById('pgTarikh').value         || '-';
+    data['Masa']            = formatTime24(document.getElementById('pgMasa').value);
+
+  } else if(jenis === 'projektor'){
+    data['No Projektor'] = document.getElementById('noProjektor').value || '-';
+  }
+
+  try {
+    const res = await fetch(POST_API[jenis], {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({data: JSON.stringify(data)})
+    });
+    const r = await res.json();
+    if(r.status === 'success'){
+      showMessage('✓ Permohonan berjaya dihantar!', 'success');
+      e.target.reset();
+      document.getElementById('jabatan').value = '';
+      updateFieldsByJenis('');
+      // Reset jenis select kalau bukan dari QR
+      const params = new URLSearchParams(window.location.search);
+      if(!params.get('jenis')){
+        document.getElementById('jenisSelect').value = '';
+      }
+    } else {
+      showMessage('✗ Gagal hantar. Cuba lagi.', 'error');
+    }
+  } catch(err) {
+    console.error(err);
+    showMessage('✗ Ralat sambungan. Sila cuba lagi.', 'error');
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+function showMessage(msg, type){
+  const el = document.getElementById('message');
+  el.textContent = msg;
+  el.className   = `message ${type}`;
+  el.style.display = 'block';
+  if(type === 'success') setTimeout(() => el.style.display = 'none', 5000);
+}
+
+/* ── DOMContentLoaded ── */
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadNames();
+  setupAutocomplete();
+
+  // Auto-set jenis dari URL (QR scan)
+  const params     = new URLSearchParams(window.location.search);
+  const jenisParam = params.get('jenis');
   const mappedJenis = jenisParam ? (jenisMap[jenisParam] || '') : '';
 
   if(mappedJenis){
-    jenisSelect.value                = mappedJenis;
+    const sel = document.getElementById('jenisSelect');
+    sel.value = mappedJenis;
     updateFieldsByJenis(mappedJenis);
-    jenisSelect.disabled             = true;
-    jenisSelect.style.pointerEvents  = 'none';
-    jenisSelect.style.opacity        = '0.6';
-    jenisSelect.style.backgroundColor = '#e5e7eb';
-    jenisLabel.textContent           = 'Jenis Aset: ' + jenisParam;
-    jenisLabel.style.color           = '#059669';
+
+    // Kunci dropdown supaya user tak boleh tukar
+    sel.disabled                = true;
+    sel.style.pointerEvents     = 'none';
+    sel.style.opacity           = '0.7';
+    sel.style.backgroundColor   = '#e5e7eb';
+
+    // Update label & tajuk
+    const label = document.getElementById('jenisLabel');
+    label.textContent  = '✅ Jenis Aset: ' + (jenisNama[mappedJenis] || jenisParam);
+    label.style.color  = '#059669';
+
+    document.getElementById('formTitle').textContent =
+      'Permohonan ' + (jenisNama[mappedJenis] || jenisParam);
   }
 });
+
+const submitBtn = document.getElementById('submitBtn');
 </script>
 
 </body>
