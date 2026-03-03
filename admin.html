@@ -81,7 +81,6 @@ body{background:linear-gradient(135deg,var(--bg1),var(--bg2));min-height:100vh;p
  cursor:pointer;
 }
 
-/* data + dashboard */
 .filter{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;}
 select,input{padding:10px;border-radius:8px;border:1px solid #ccc;flex:1;min-width:150px;}
 .table-wrap{background:var(--card);border-radius:12px;overflow-x:auto;}
@@ -93,25 +92,11 @@ th{background:var(--bg1);color:white;}
 .card{background:var(--card);padding:20px;border-radius:12px;flex:1;min-width:180px;text-align:center;}
 .card h2{color:var(--bg1);}
 
-/* Item list styling */
-.item-list{
- font-size:13px;
- max-width:300px;
-}
-.item-badge{
- display:inline-block;
- background:#e0f2fe;
- color:#0369a1;
- padding:3px 8px;
- margin:2px;
- border-radius:4px;
- font-size:12px;
-}
+.item-list{font-size:13px;max-width:320px;line-height:1.8;}
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
 <div class="header">
@@ -164,7 +149,7 @@ th{background:var(--bg1);color:white;}
  <div class="table-wrap">
   <table>
    <thead>
-    <tr><th>No</th><th>Jenis</th><th>Nama</th><th>Jabatan</th><th>Item Diminta</th><th>Tarikh</th></tr>
+    <tr><th>No</th><th>Jenis</th><th>Nama</th><th>Jabatan</th><th>Item Diminta</th><th>Tarikh Hantar</th></tr>
    </thead>
    <tbody id="tableData">
     <tr><td colspan="6" class="loading">Memuatkan...</td></tr>
@@ -187,55 +172,59 @@ th{background:var(--bg1);color:white;}
 </div>
 
 <script>
-// SECURITY
-if(sessionStorage.getItem('isLoggedIn')!=='true')location.href='adminlogin.html';
-function logout(){sessionStorage.clear();location.href='adminlogin.html';}
+if(sessionStorage.getItem('isLoggedIn')!=='true') location.href='adminlogin.html';
+function logout(){ sessionStorage.clear(); location.href='adminlogin.html'; }
 
 const qrGrid = document.getElementById('qrGrid');
 
 const FORM_URLS=[
- {label:"AlatTulis2026",url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=AlatTulis2026"},
- {label:"Kenderaan2026",url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Kenderaan2026"},
- {label:"PermohonanKenderaan2026",url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=PermohonanKenderaan2026"},
- {label:"Projektor2026",url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Projektor2026"}
+ {label:"AlatTulis2026",           url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=AlatTulis2026"},
+ {label:"Kenderaan2026",           url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Kenderaan2026"},
+ {label:"PermohonanKenderaan2026", url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=PermohonanKenderaan2026"},
+ {label:"Projektor2026",           url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Projektor2026"}
 ];
 
 const SCRIPT_URLS=[
- {label:"AlatTulis2026",url:"https://script.google.com/macros/s/AKfycbyXUmQO6701Tv7f7vl7xuFcVgdvw0vKUSUiCjNiTx_blv2XPaYL1dPenP09ulcwc6Ug6w/exec"},
- {label:"Kenderaan2026",url:"https://script.google.com/macros/s/AKfycby0eimKxmekifIZFVHw4HnQCaIVmpXQiYJ27usQpNv7v1kCVanOyqo1X-d-N4msUKnq/exec"},
- {label:"PermohonanKenderaan2026",url:"https://script.google.com/macros/s/AKfycbzv_OAsVHSyarm6mTFXILvFH0458FvV_8PUBdoSAeK3XPrn9nqhePD_CMRrpLWcsBMl/exec"},
- {label:"Projektor2026",url:"https://script.google.com/macros/s/AKfycbwp9cqsZMSqcRrB04SQLWtkR0ryjATCw113ES2cogQ3A1jlD8XOLyJ0hQ1hNJCmTknf/exec"}
+ {label:"AlatTulis2026",           url:"https://script.google.com/macros/s/AKfycbyXUmQO6701Tv7f7vl7xuFcVgdvw0vKUSUiCjNiTx_blv2XPaYL1dPenP09ulcwc6Ug6w/exec"},
+ {label:"Kenderaan2026",           url:"https://script.google.com/macros/s/AKfycby0eimKxmekifIZFVHw4HnQCaIVmpXQiYJ27usQpNv7v1kCVanOyqo1X-d-N4msUKnq/exec"},
+ {label:"PermohonanKenderaan2026", url:"https://script.google.com/macros/s/AKfycbzv_OAsVHSyarm6mTFXILvFH0458FvV_8PUBdoSAeK3XPrn9nqhePD_CMRrpLWcsBMl/exec"},
+ {label:"Projektor2026",           url:"https://script.google.com/macros/s/AKfycbwp9cqsZMSqcRrB04SQLWtkR0ryjATCw113ES2cogQ3A1jlD8XOLyJ0hQ1hNJCmTknf/exec"}
 ];
 
-// TAB
+// Semua variasi nama field standard (huruf besar/kecil) — TIDAK dipapar dalam Item Diminta
+const SKIP_FIELDS = [
+ 'timestamp','nama','jabatan','jenispermohonan',
+ 'jenis_permohonan','email','notelefon','no_telefon','_jenis'
+];
+
+/* ══════════════════════════
+   TAB
+══════════════════════════ */
 function tab(x){
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
  document.querySelector(`[onclick="tab('${x}')"]`).classList.add('active');
  document.getElementById(x).classList.add('active');
- if(x==='qr')generateQR();
- if(x==='data')loadData();
- if(x==='dash')updateDash();
+ if(x==='qr')  generateQR();
+ if(x==='data') loadData();
+ if(x==='dash') updateDash();
 }
 
-/* ======================
+/* ══════════════════════════
    QR
-====================== */
+══════════════════════════ */
 function generateQR(){
- qrGrid.innerHTML = '';
+ qrGrid.innerHTML='';
  FORM_URLS.forEach((f,i)=>{
   const card=document.createElement('div');
   card.className='qr-card';
   card.innerHTML=`
    <h3>QR ${f.label}</h3>
    <div class="qr-box"><div id="qr_${i}"></div></div>
-   <button class="btn" onclick="downloadQR('qr_${i}','QR_${f.label}')">Muat Turun</button>
-  `;
+   <button class="btn" onclick="downloadQR('qr_${i}','QR_${f.label}')">Muat Turun</button>`;
   qrGrid.appendChild(card);
   setTimeout(()=>{
-   new QRCode(document.getElementById(`qr_${i}`),{
-    text:f.url,width:200,height:200
-   });
+   new QRCode(document.getElementById(`qr_${i}`),{text:f.url,width:200,height:200});
   },100);
  });
 }
@@ -248,85 +237,104 @@ function downloadQR(id,name){
  a.click();
 }
 
-/* ======================
-   FORMAT HELPERS
-====================== */
-
-// Format kolum Tarikh (format 24 jam)
-function formatDateTime(iso){
- if(!iso) return '-';
- const d=new Date(iso);
- if(isNaN(d)) return iso;
- const day=String(d.getDate()).padStart(2,'0');
- const month=String(d.getMonth()+1).padStart(2,'0');
- const year=d.getFullYear();
- const hh=String(d.getHours()).padStart(2,'0');
- const mm=String(d.getMinutes()).padStart(2,'0');
- const ss=String(d.getSeconds()).padStart(2,'0');
- return `${day}/${month}/${year} ${hh}:${mm}:${ss}`;
+/* ══════════════════════════
+   FORMAT
+══════════════════════════ */
+function formatDateTime(val){
+ if(!val) return '-';
+ const d=new Date(val);
+ if(isNaN(d)) return String(val);
+ const dd  =String(d.getDate()).padStart(2,'0');
+ const mm  =String(d.getMonth()+1).padStart(2,'0');
+ const yyyy=d.getFullYear();
+ const hh  =String(d.getHours()).padStart(2,'0');
+ const min =String(d.getMinutes()).padStart(2,'0');
+ const ss  =String(d.getSeconds()).padStart(2,'0');
+ return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
 }
 
-// Format nilai dalam Item Diminta (tangani ISO tarikh & masa Google Sheets)
 function formatValue(val){
- if(!val || val==='' || val==='-') return val;
- const str = String(val);
+ if(val===null||val===undefined) return '-';
+ const str=String(val).trim();
+ if(str===''||str==='-') return '-';
 
- // Masa sahaja dari Google Sheets — disimpan sebagai 1899-12-30Txx:xx:xx.000Z
- if(/^1899-12-30T/.test(str)){
+ // Masa sahaja Google Sheets: 1899-12-30Txx:xx:xx.000Z
+ if(/^1899-12-30T/i.test(str)){
   const d=new Date(str);
   if(!isNaN(d)){
-   const hh=String(d.getUTCHours()).padStart(2,'0');
-   const mm=String(d.getUTCMinutes()).padStart(2,'0');
-   const ss=String(d.getUTCSeconds()).padStart(2,'0');
-   return `${hh}:${mm}:${ss}`;
+   return String(d.getUTCHours()).padStart(2,'0')+':'+
+          String(d.getUTCMinutes()).padStart(2,'0')+':'+
+          String(d.getUTCSeconds()).padStart(2,'0');
   }
  }
-
- // Tarikh penuh ISO (contoh: 2026-03-10T16:00:00.000Z)
- if(/^\d{4}-\d{2}-\d{2}T/.test(str)){
+ // Tarikh penuh ISO
+ if(/^\d{4}-\d{2}-\d{2}T/i.test(str)){
   const d=new Date(str);
   if(!isNaN(d)){
-   const day=String(d.getDate()).padStart(2,'0');
-   const month=String(d.getMonth()+1).padStart(2,'0');
-   const year=d.getFullYear();
-   const hh=String(d.getHours()).padStart(2,'0');
-   const mm=String(d.getMinutes()).padStart(2,'0');
-   const ss=String(d.getSeconds()).padStart(2,'0');
-   return `${day}/${month}/${year} ${hh}:${mm}:${ss}`;
+   return String(d.getDate()).padStart(2,'0')+'/'+
+          String(d.getMonth()+1).padStart(2,'0')+'/'+
+          d.getFullYear()+' '+
+          String(d.getHours()).padStart(2,'0')+':'+
+          String(d.getMinutes()).padStart(2,'0');
   }
  }
-
+ // Tarikh sahaja YYYY-MM-DD
+ if(/^\d{4}-\d{2}-\d{2}$/.test(str)){
+  const [y,m,d]=str.split('-');
+  return `${d}/${m}/${y}`;
+ }
  return str;
 }
 
-function extractItems(data){
- const items=[];
- const standardFields=['Timestamp','Nama','Jabatan','JenisPermohonan','Email','NoTelefon'];
- for(const key in data){
-  if(!standardFields.includes(key) && data[key] && data[key]!=='' && data[key]!=='-'){
-   items.push(`${key}: ${formatValue(data[key])}`);
-  }
+// Ambil nilai field — cuba pelbagai variasi nama
+function getField(row,...keys){
+ for(const k of keys){
+  const v=row[k];
+  if(v!==undefined && v!==null && String(v).trim()!=='')
+   return String(v).trim();
  }
- return items.length?items.join(', '):'-';
+ return '-';
 }
 
-/* ======================
-   DATA & DASHBOARD
-====================== */
+// Ambil timestamp
+function getTimestamp(row){
+ return row['Timestamp']||row['timestamp']||row['TIMESTAMP']||'';
+}
 
+// Bina Item Diminta — papar semua field kecuali yang standard
+function extractItems(row){
+ const items=[];
+ for(const key in row){
+  if(SKIP_FIELDS.includes(key.toLowerCase().trim())) continue;
+  const val=row[key];
+  if(val===null||val===undefined) continue;
+  const str=String(val).trim();
+  if(str===''||str==='-') continue;
+  const fmt=formatValue(val);
+  if(fmt==='-') continue;
+  items.push(`<b>${key}:</b> ${fmt}`);
+ }
+ return items.length?items.join('<br>'):'-';
+}
+
+/* ══════════════════════════
+   DATA
+══════════════════════════ */
 let all=[],filtered=[];
 
 async function loadData(){
  all=[];
- document.getElementById('tableData').innerHTML='<tr><td colspan="6" class="loading">⏳ Memuatkan data...</td></tr>';
+ document.getElementById('tableData').innerHTML=
+  '<tr><td colspan="6" class="loading">⏳ Memuatkan data...</td></tr>';
+
  for(const s of SCRIPT_URLS){
   try{
-   const r=await fetch(s.url);
-   const d=await r.json();
-   const rows=Array.isArray(d)?d:Object.values(d).flat();
-   rows.forEach(x=>x.JenisPermohonan=s.label);
+   const r  =await fetch(s.url);
+   const raw=await r.json();
+   const rows=Array.isArray(raw)?raw:Object.values(raw).flat();
+   rows.forEach(x=>{ x._jenis=s.label; });
    all=all.concat(rows);
-  }catch(e){console.warn('Gagal load:',s.label,e);}
+  }catch(e){ console.warn('Gagal load:',s.label,e); }
  }
  filterData();
 }
@@ -335,15 +343,20 @@ function filterData(){
  const j=document.getElementById('fJenis').value;
  const b=document.getElementById('fBulan').value;
  const q=document.getElementById('search').value.toLowerCase();
- filtered=all.filter(d=>{
-  const bulan=d.Timestamp?String(new Date(d.Timestamp).getMonth()+1).padStart(2,'0'):'';
-  const txt=extractItems(d).toLowerCase();
-  return (j==='all'||d.JenisPermohonan===j)&&
-   (b==='all'||bulan===b)&&
-   ((d.Nama||'').toLowerCase().includes(q)||
-    (d.Jabatan||'').toLowerCase().includes(q)||txt.includes(q));
+
+ filtered=all.filter(row=>{
+  const ts   =getTimestamp(row);
+  const bulan=ts?String(new Date(ts).getMonth()+1).padStart(2,'0'):'';
+  const nama =getField(row,'Nama','nama').toLowerCase();
+  const jab  =getField(row,'Jabatan','jabatan').toLowerCase();
+  const items=extractItems(row).toLowerCase();
+
+  return (j==='all'||row._jenis===j)&&
+         (b==='all'||bulan===b)&&
+         (nama.includes(q)||jab.includes(q)||items.includes(q));
  });
- render(); updateDash();
+ render();
+ updateDash();
 }
 
 function render(){
@@ -352,25 +365,26 @@ function render(){
   tbody.innerHTML='<tr><td colspan="6" class="loading">Tiada Data</td></tr>';
   return;
  }
- tbody.innerHTML=filtered.map((d,i)=>`
+ tbody.innerHTML=filtered.map((row,i)=>`
   <tr>
    <td>${i+1}</td>
-   <td>${d.JenisPermohonan}</td>
-   <td>${d.Nama||'-'}</td>
-   <td>${d.Jabatan||'-'}</td>
-   <td class="item-list">${extractItems(d)}</td>
-   <td>${formatDateTime(d.Timestamp)}</td>
+   <td>${row._jenis}</td>
+   <td>${getField(row,'Nama','nama')}</td>
+   <td>${getField(row,'Jabatan','jabatan')}</td>
+   <td class="item-list">${extractItems(row)}</td>
+   <td>${formatDateTime(getTimestamp(row))}</td>
   </tr>`).join('');
 }
 
 function exportExcel(){
  if(!filtered.length) return alert('Tiada data untuk dieksport');
- const ws=XLSX.utils.json_to_sheet(filtered.map(d=>({
-  JenisPermohonan:d.JenisPermohonan,
-  Nama:d.Nama||'-',
-  Jabatan:d.Jabatan||'-',
-  ItemDiminta:extractItems(d),
-  Timestamp:formatDateTime(d.Timestamp)
+ const strip=s=>s.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+ const ws=XLSX.utils.json_to_sheet(filtered.map(row=>({
+  JenisPermohonan:row._jenis,
+  Nama:getField(row,'Nama','nama'),
+  Jabatan:getField(row,'Jabatan','jabatan'),
+  ItemDiminta:strip(extractItems(row)),
+  Timestamp:formatDateTime(getTimestamp(row))
  })));
  const wb=XLSX.utils.book_new();
  XLSX.utils.book_append_sheet(wb,ws,'Permohonan');
@@ -379,10 +393,10 @@ function exportExcel(){
 
 function updateDash(){
  document.getElementById('total').innerText =filtered.length;
- document.getElementById('alat').innerText  =filtered.filter(x=>x.JenisPermohonan==='AlatTulis2026').length;
- document.getElementById('ken').innerText   =filtered.filter(x=>x.JenisPermohonan==='Kenderaan2026').length;
- document.getElementById('pgken').innerText =filtered.filter(x=>x.JenisPermohonan==='PermohonanKenderaan2026').length;
- document.getElementById('pro').innerText   =filtered.filter(x=>x.JenisPermohonan==='Projektor2026').length;
+ document.getElementById('alat').innerText  =filtered.filter(x=>x._jenis==='AlatTulis2026').length;
+ document.getElementById('ken').innerText   =filtered.filter(x=>x._jenis==='Kenderaan2026').length;
+ document.getElementById('pgken').innerText =filtered.filter(x=>x._jenis==='PermohonanKenderaan2026').length;
+ document.getElementById('pro').innerText   =filtered.filter(x=>x._jenis==='Projektor2026').length;
 }
 
 document.addEventListener('DOMContentLoaded',generateQR);
