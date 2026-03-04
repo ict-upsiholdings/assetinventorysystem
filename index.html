@@ -669,10 +669,10 @@ function confirmClock(){
 
 // Click on face to set by angle
 /* ── Helper: get 12h masa string ── */
-function getMasa12h(){
-  return document.getElementById('pgMasaValue').value || null;
+function getMasa12h(id){
+  return document.getElementById(id).value || null;
 }
-
+  
 /* ── Submit form ── */
 document.getElementById('assetForm').addEventListener('submit', async e => {
   e.preventDefault();
@@ -713,7 +713,7 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
 
   } else if(jenis === 'kenderaan'){
     data.jenis_kenderaan = document.getElementById('jenisKenderaan').value || '-';
-    data.masa            = document.getElementById('masaValue').value      || '-';
+    data.masa = getMasa12h('masaValue') || '-';
     data.nama_pemandu    = document.getElementById('namaPemandu').value    || '-';
     data.lokasi          = document.getElementById('lokasi').value         || '-';
     data.tujuan          = document.getElementById('tujuan').value         || '-';
@@ -723,7 +723,7 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
     data.jenis_kenderaan = document.getElementById('pgJenisKenderaan').value || '-';
     data.tarikh_pergi    = document.getElementById('pgTarikhPergi').value    || '-';
     data.tarikh_balik    = document.getElementById('pgTarikhBalik').value    || '-';
-    data.masa            = getMasa12h() || '-';
+    data.masa = getMasa12h('pgMasaValue') || '-';
     data.nama_pemandu    = document.getElementById('pgNamaPemandu').value    || '-';
     data.lokasi          = document.getElementById('pgLokasi').value         || '-';
     data.tujuan          = document.getElementById('pgTujuan').value         || '-';
@@ -840,3 +840,4 @@ const submitBtn = document.getElementById('submitBtn');
 
 </body>
 </html>
+
