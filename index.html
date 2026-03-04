@@ -145,7 +145,9 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <option value="projektor">Projektor</option>
     </select>
 
-    <!-- Alat Tulis -->
+    <!-- ═══════════════════════════════
+         ALAT TULIS
+    ═══════════════════════════════ -->
     <div id="wrap_item" class="hidden">
       <label>Jenis Alatan</label>
       <input type="text" id="item" placeholder="Contoh: Pen, Kertas A4...">
@@ -155,7 +157,9 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <input type="number" id="kuantiti" placeholder="Kuantiti" min="1">
     </div>
 
-    <!-- Kenderaan Penggunaan -->
+    <!-- ═══════════════════════════════
+         KENDERAAN PENGGUNAAN
+    ═══════════════════════════════ -->
     <div id="wrap_jenisKenderaan" class="hidden">
       <label>Jenis Kenderaan</label>
       <input type="text" id="jenisKenderaan" placeholder="Contoh: Van">
@@ -181,33 +185,42 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <input type="number" id="bacaanOdo" placeholder="Bacaan Odometer (km)">
     </div>
 
-    <!-- Permohonan Kenderaan -->
+    <!-- ═══════════════════════════════
+         PERMOHONAN KENDERAAN
+         Fields: Jenis Kenderaan, Tarikh Pergi, Tarikh Balik, Masa, Nama Pemandu, Lokasi, Tujuan
+    ═══════════════════════════════ -->
     <div id="wrap_pgJenisKenderaan" class="hidden">
       <label>Jenis Kenderaan</label>
-      <input type="text" id="pgJenisKenderaan" placeholder="Contoh: Van">
+      <input type="text" id="pgJenisKenderaan" placeholder="Contoh: Van, Kereta...">
+    </div>
+    <div id="wrap_pgTarikhPergi" class="hidden">
+      <label>Tarikh Pergi <span style="color:red">*</span></label>
+      <input type="date" id="pgTarikhPergi">
+    </div>
+    <div id="wrap_pgTarikhBalik" class="hidden">
+      <label>Tarikh Balik <span style="color:red">*</span></label>
+      <input type="date" id="pgTarikhBalik">
+    </div>
+    <div id="wrap_pgMasa" class="hidden">
+      <label>Masa <span style="color:red">*</span></label>
+      <input type="time" id="pgMasa">
     </div>
     <div id="wrap_pgNamaPemandu" class="hidden">
       <label>Nama Pemandu</label>
       <input type="text" id="pgNamaPemandu" placeholder="Nama Pemandu">
     </div>
     <div id="wrap_pgLokasi" class="hidden">
-      <label>Lokasi</label>
+      <label>Lokasi <span style="color:red">*</span></label>
       <input type="text" id="pgLokasi" placeholder="Lokasi">
     </div>
     <div id="wrap_pgTujuan" class="hidden">
-      <label>Tujuan</label>
+      <label>Tujuan <span style="color:red">*</span></label>
       <input type="text" id="pgTujuan" placeholder="Tujuan">
     </div>
-    <div id="wrap_pgTarikh" class="hidden">
-      <label>Tarikh</label>
-      <input type="date" id="pgTarikh">
-    </div>
-    <div id="wrap_pgMasa" class="hidden">
-      <label>Masa</label>
-      <input type="time" id="pgMasa">
-    </div>
 
-    <!-- Projektor -->
+    <!-- ═══════════════════════════════
+         PROJEKTOR
+    ═══════════════════════════════ -->
     <div id="wrap_noProjektor" class="hidden">
       <label>No Projektor</label>
       <input type="text" id="noProjektor" placeholder="No Projektor">
@@ -294,7 +307,6 @@ function setupAutocomplete(){
 
   nama.addEventListener('input', () => {
     const q = nama.value.trim();
-    // Clear jabatan bila user taip semula
     jab.value = '';
 
     if(!q || !namesData.length){ drop.classList.add('hidden'); return; }
@@ -331,9 +343,14 @@ function setupAutocomplete(){
 
 /* ── Show/hide fields ikut jenis ── */
 const allWraps = [
+  // Alat Tulis
   'wrap_item','wrap_kuantiti',
+  // Kenderaan Penggunaan
   'wrap_jenisKenderaan','wrap_masa','wrap_namaPemandu','wrap_lokasi','wrap_tujuan','wrap_bacaanOdo',
-  'wrap_pgJenisKenderaan','wrap_pgNamaPemandu','wrap_pgLokasi','wrap_pgTujuan','wrap_pgTarikh','wrap_pgMasa',
+  // Permohonan Kenderaan
+  'wrap_pgJenisKenderaan','wrap_pgTarikhPergi','wrap_pgTarikhBalik','wrap_pgMasa',
+  'wrap_pgNamaPemandu','wrap_pgLokasi','wrap_pgTujuan',
+  // Projektor
   'wrap_noProjektor'
 ];
 
@@ -360,12 +377,15 @@ function updateFieldsByJenis(jenis){
     show('wrap_bacaanOdo');
   }
   if(jenis === 'permohonan_kenderaan'){
+    // ✅ Field baru: Tarikh Pergi + Tarikh Balik
+    // ✅ Buang: Jenis Kenderaan
     show('wrap_pgJenisKenderaan');
+    show('wrap_pgTarikhPergi');
+    show('wrap_pgTarikhBalik');
+    show('wrap_pgMasa');
     show('wrap_pgNamaPemandu');
     show('wrap_pgLokasi');
     show('wrap_pgTujuan');
-    show('wrap_pgTarikh');
-    show('wrap_pgMasa');
   }
   if(jenis === 'projektor'){
     show('wrap_noProjektor');
@@ -381,6 +401,15 @@ document.getElementById('jenisSelect').addEventListener('change', function(){
   updateFieldsByJenis(this.value);
 });
 
+/* ── Validate tarikh balik >= tarikh pergi ── */
+document.getElementById('pgTarikhBalik').addEventListener('change', function(){
+  const pergi = document.getElementById('pgTarikhPergi').value;
+  if(pergi && this.value && this.value < pergi){
+    showMessage('⚠️ Tarikh Balik tidak boleh lebih awal dari Tarikh Pergi', 'warning');
+    this.value = '';
+  }
+});
+
 /* ── Submit form ── */
 document.getElementById('assetForm').addEventListener('submit', async e => {
   e.preventDefault();
@@ -393,6 +422,20 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
   if(!namaVal) return showMessage('Sila masukkan nama', 'warning');
   if(!jabVal)  return showMessage('Sila masukkan jabatan', 'warning');
 
+  // Validate permohonan kenderaan
+  if(jenis === 'permohonan_kenderaan'){
+    const tPergi = document.getElementById('pgTarikhPergi').value;
+    const tBalik = document.getElementById('pgTarikhBalik').value;
+    const masa   = document.getElementById('pgMasa').value;
+    const lokasi = document.getElementById('pgLokasi').value.trim();
+    const tujuan = document.getElementById('pgTujuan').value.trim();
+    if(!tPergi)  return showMessage('Sila isi Tarikh Pergi', 'warning');
+    if(!tBalik)  return showMessage('Sila isi Tarikh Balik', 'warning');
+    if(!masa)    return showMessage('Sila isi Masa', 'warning');
+    if(!lokasi)  return showMessage('Sila isi Lokasi', 'warning');
+    if(!tujuan)  return showMessage('Sila isi Tujuan', 'warning');
+  }
+
   submitBtn.disabled = true;
 
   let data = {
@@ -401,27 +444,28 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
     timestamp: new Date().toISOString()
   };
 
-  // ✅ BUG FIXED: Buang tanda '] yang salah
   if(jenis === 'alat_tulis'){
     data.jenis_alatan = document.getElementById('item').value     || '-';
     data.kuantiti     = document.getElementById('kuantiti').value || '-';
 
   } else if(jenis === 'kenderaan'){
-    data.jenis_kenderaan  = document.getElementById('jenisKenderaan').value || '-';
-    data.masa             = document.getElementById('masa').value           || '-';
-    data.nama_pemandu     = document.getElementById('namaPemandu').value    || '-';
-    data.lokasi           = document.getElementById('lokasi').value         || '-';
-    data.tujuan           = document.getElementById('tujuan').value         || '-';
-    data.bacaan_odometer  = document.getElementById('bacaanOdo').value      || '-';
+    data.jenis_kenderaan = document.getElementById('jenisKenderaan').value || '-';
+    data.masa            = document.getElementById('masa').value           || '-';
+    data.nama_pemandu    = document.getElementById('namaPemandu').value    || '-';
+    data.lokasi          = document.getElementById('lokasi').value         || '-';
+    data.tujuan          = document.getElementById('tujuan').value         || '-';
+    data.bacaan_odometer = document.getElementById('bacaanOdo').value      || '-';
 
   } else if(jenis === 'permohonan_kenderaan'){
-    // ✅ BUG FIXED: Ini punca utama crash — tanda '] dibuang
-    data.jenis_kenderaan  = document.getElementById('pgJenisKenderaan').value || '-';
-    data.nama_pemandu     = document.getElementById('pgNamaPemandu').value    || '-';
-    data.lokasi           = document.getElementById('pgLokasi').value         || '-';
-    data.tujuan           = document.getElementById('pgTujuan').value         || '-';
-    data.tarikh           = document.getElementById('pgTarikh').value         || '-';
-    data.masa             = document.getElementById('pgMasa').value           || '-';
+    // ✅ Data: Nama, Jabatan, Jenis Kenderaan, Tarikh Pergi, Tarikh Balik, Masa,
+    //          Nama Pemandu, Lokasi, Tujuan, Timestamp
+    data.jenis_kenderaan = document.getElementById('pgJenisKenderaan').value || '-';
+    data.tarikh_pergi  = document.getElementById('pgTarikhPergi').value  || '-';
+    data.tarikh_balik  = document.getElementById('pgTarikhBalik').value  || '-';
+    data.masa          = document.getElementById('pgMasa').value         || '-';
+    data.nama_pemandu  = document.getElementById('pgNamaPemandu').value  || '-';
+    data.lokasi        = document.getElementById('pgLokasi').value       || '-';
+    data.tujuan        = document.getElementById('pgTujuan').value       || '-';
 
   } else if(jenis === 'projektor'){
     data.no_projektor = document.getElementById('noProjektor').value || '-';
@@ -443,7 +487,6 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
       if(!params.get('jenis')){
         document.getElementById('jenisSelect').value = '';
       } else {
-        // Re-set jenis dari URL selepas reset
         const mappedJenis = jenisMap[params.get('jenis')] || '';
         if(mappedJenis){
           document.getElementById('jenisSelect').value = mappedJenis;
@@ -474,7 +517,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadNames();
   setupAutocomplete();
 
-  // Auto-set jenis dari URL (QR scan)
   const params      = new URLSearchParams(window.location.search);
   const jenisParam  = params.get('jenis');
   const mappedJenis = jenisParam ? (jenisMap[jenisParam] || '') : '';
@@ -503,6 +545,3 @@ const submitBtn = document.getElementById('submitBtn');
 
 </body>
 </html>
-
-
-
