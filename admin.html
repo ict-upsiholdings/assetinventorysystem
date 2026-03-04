@@ -178,11 +178,10 @@ function logout(){ sessionStorage.clear(); location.href='adminlogin.html'; }
 const qrGrid = document.getElementById('qrGrid');
 
 const FORM_URLS=[
- {label:"AlatTulis2026",              url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=AlatTulis2026"},
- // ✅ FIX 1: Nama QR ditukar kepada "PenggunaanKenderaan2026"
- {label:"PenggunaanKenderaan2026",    url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Kenderaan2026"},
- {label:"PermohonanKenderaan2026",    url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=PermohonanKenderaan2026"},
- {label:"Projektor2026",              url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Projektor2026"}
+ {label:"AlatTulis2026",           url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=AlatTulis2026"},
+ {label:"PenggunaanKenderaan2026", url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Kenderaan2026"},
+ {label:"PermohonanKenderaan2026", url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=PermohonanKenderaan2026"},
+ {label:"Projektor2026",           url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Projektor2026"}
 ];
 
 const SCRIPT_URLS=[
@@ -205,7 +204,7 @@ function tab(x){
  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
  document.querySelector(`[onclick="tab('${x}')"]`).classList.add('active');
  document.getElementById(x).classList.add('active');
- if(x==='qr')  generateQR();
+ if(x==='qr')   generateQR();
  if(x==='data') loadData();
  if(x==='dash') updateDash();
 }
@@ -238,29 +237,52 @@ function downloadQR(id,name){
 }
 
 /* ══════════════════════════
-   FORMAT
+   FORMAT TARIKH HANTAR
+   (Timestamp dari form — ISO string, papar dalam local time Malaysia)
 ══════════════════════════ */
 function formatDateTime(val){
  if(!val) return '-';
  const d=new Date(val);
  if(isNaN(d)) return String(val);
- const dd  =String(d.getDate()).padStart(2,'0');
- const mm  =String(d.getMonth()+1).padStart(2,'0');
- const yyyy=d.getFullYear();
- const hh  =String(d.getHours()).padStart(2,'0');
- const min =String(d.getMinutes()).padStart(2,'0');
- const ss  =String(d.getSeconds()).padStart(2,'0');
- return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+ // Guna local time untuk timestamp (ia sudah dalam Malaysia time sebab dihantar dari browser)
+ return String(d.getDate()).padStart(2,'0')+'/'+
+        String(d.getMonth()+1).padStart(2,'0')+'/'+
+        d.getFullYear()+' '+
+        String(d.getHours()).padStart(2,'0')+':'+
+        String(d.getMinutes()).padStart(2,'0')+':'+
+        String(d.getSeconds()).padStart(2,'0');
 }
 
-// ✅ FIX 2: formatValue diperbaiki supaya masa = masa sahaja, tarikh = tarikh sahaja
+/* ══════════════════════════
+   FORMAT NILAI FIELD
+   Tangani semua format masa/tarikh dari Google Sheets
+══════════════════════════ */
 function formatValue(val){
  if(val===null||val===undefined) return '-';
  const str=String(val).trim();
  if(str===''||str==='-') return '-';
 
- // ✅ Masa sahaja dari Google Sheets — simpan sebagai 1899-12-30Txx:xx:xx.000Z
- // Buang tarikh 1899, papar masa sahaja dalam format HH:MM
+ // ── 1. Nombor perpuluhan (masa Google Sheets, contoh: 0.4375 = 10:30)
+ //    Google Sheets simpan masa sebagai fraction of day: 10:30 = 10.5/24 = 0.4375
+ if(/^\d*\.\d+$/.test(str)){
+  const num=parseFloat(str);
+  if(num>=0 && num<1){
+   const totalMin=Math.round(num*24*60);
+   const hh=Math.floor(totalMin/60);
+   const mm=totalMin%60;
+   return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+  }
+ }
+
+ // ── 2. Masa string biasa HH:MM atau HH:MM:SS — semak DULU sebelum ISO parsing
+ if(/^\d{1,2}:\d{2}(:\d{2})?$/.test(str)){
+  const parts=str.split(':');
+  return parts[0].padStart(2,'0')+':'+parts[1].padStart(2,'0');
+ }
+
+ // ── 3. Format khas Google Sheets masa sahaja: 1899-12-30Txx:xx:xx.000Z
+ //    WAJIB guna getUTCHours/getUTCMinutes — jangan guna getHours() kerana
+ //    akan offset timezone dan bagi masa salah
  if(/^1899-12-30T/i.test(str)){
   const d=new Date(str);
   if(!isNaN(d)){
@@ -269,30 +291,24 @@ function formatValue(val){
   }
  }
 
- // ✅ Tarikh penuh ISO — papar tarikh + masa
- if(/^\d{4}-\d{2}-\d{2}T/i.test(str)){
-  const d=new Date(str);
-  if(!isNaN(d)){
-   // Kalau masa = 00:00, kemungkinan ini tarikh sahaja — papar tarikh sahaja
-   const hh=d.getHours(), mn=d.getMinutes();
-   const dateStr=String(d.getDate()).padStart(2,'0')+'/'+
-                 String(d.getMonth()+1).padStart(2,'0')+'/'+
-                 d.getFullYear();
-   if(hh===0 && mn===0) return dateStr;
-   return dateStr+' '+String(hh).padStart(2,'0')+':'+String(mn).padStart(2,'0');
-  }
- }
-
- // ✅ Tarikh sahaja YYYY-MM-DD
+ // ── 4. Tarikh sahaja YYYY-MM-DD
  if(/^\d{4}-\d{2}-\d{2}$/.test(str)){
   const [y,m,d]=str.split('-');
   return `${d}/${m}/${y}`;
  }
 
- // ✅ Masa sahaja HH:MM atau HH:MM:SS (string biasa)
- if(/^\d{1,2}:\d{2}(:\d{2})?$/.test(str)){
-  const parts=str.split(':');
-  return parts[0].padStart(2,'0')+':'+parts[1].padStart(2,'0');
+ // ── 5. Tarikh penuh ISO dari Google Sheets (tarikh dengan masa)
+ //    Guna UTC kerana Google Sheets hantar dalam UTC
+ if(/^\d{4}-\d{2}-\d{2}T/i.test(str)){
+  const d=new Date(str);
+  if(!isNaN(d)){
+   const dateStr=String(d.getUTCDate()).padStart(2,'0')+'/'+
+                 String(d.getUTCMonth()+1).padStart(2,'0')+'/'+
+                 d.getUTCFullYear();
+   const hh=d.getUTCHours(), mn=d.getUTCMinutes();
+   if(hh===0 && mn===0) return dateStr; // tarikh sahaja
+   return dateStr+' '+String(hh).padStart(2,'0')+':'+String(mn).padStart(2,'0');
+  }
  }
 
  return str;
@@ -368,7 +384,6 @@ function filterData(){
  updateDash();
 }
 
-// Label papar untuk jenis
 const jenisLabel={
  'AlatTulis2026':           'AlatTulis2026',
  'Kenderaan2026':           'PenggunaanKenderaan2026',
