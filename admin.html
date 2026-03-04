@@ -121,10 +121,10 @@ th{background:var(--bg1);color:white;}
  <div class="filter">
   <select id="fJenis" onchange="filterData()">
    <option value="all">Semua Jenis</option>
-   <option>AlatTulis2026</option>
-   <option>Kenderaan2026</option>
-   <option>PermohonanKenderaan2026</option>
-   <option>Projektor2026</option>
+   <option value="AlatTulis2026">AlatTulis2026</option>
+   <option value="Kenderaan2026">PenggunaanKenderaan2026</option>
+   <option value="PermohonanKenderaan2026">PermohonanKenderaan2026</option>
+   <option value="Projektor2026">Projektor2026</option>
   </select>
   <select id="fBulan" onchange="filterData()">
    <option value="all">Semua Bulan</option>
@@ -163,7 +163,7 @@ th{background:var(--bg1);color:white;}
  <div class="dashboard">
   <div class="card"><h2>Total</h2><p id="total">0</p></div>
   <div class="card"><h2>Alat Tulis</h2><p id="alat">0</p></div>
-  <div class="card"><h2>Kenderaan</h2><p id="ken">0</p></div>
+  <div class="card"><h2>Penggunaan Kenderaan</h2><p id="ken">0</p></div>
   <div class="card"><h2>Permohonan Kenderaan</h2><p id="pgken">0</p></div>
   <div class="card"><h2>Projektor</h2><p id="pro">0</p></div>
  </div>
@@ -178,20 +178,20 @@ function logout(){ sessionStorage.clear(); location.href='adminlogin.html'; }
 const qrGrid = document.getElementById('qrGrid');
 
 const FORM_URLS=[
- {label:"AlatTulis2026",           url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=AlatTulis2026"},
- {label:"Kenderaan2026",           url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Kenderaan2026"},
- {label:"PermohonanKenderaan2026", url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=PermohonanKenderaan2026"},
- {label:"Projektor2026",           url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Projektor2026"}
+ {label:"AlatTulis2026",              url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=AlatTulis2026"},
+ // ✅ FIX 1: Nama QR ditukar kepada "PenggunaanKenderaan2026"
+ {label:"PenggunaanKenderaan2026",    url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Kenderaan2026"},
+ {label:"PermohonanKenderaan2026",    url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=PermohonanKenderaan2026"},
+ {label:"Projektor2026",              url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Projektor2026"}
 ];
 
 const SCRIPT_URLS=[
  {label:"AlatTulis2026",           url:"https://script.google.com/macros/s/AKfycbyXUmQO6701Tv7f7vl7xuFcVgdvw0vKUSUiCjNiTx_blv2XPaYL1dPenP09ulcwc6Ug6w/exec"},
- {label:"PenggunaanKenderaan2026",           url:"https://script.google.com/macros/s/AKfycby0eimKxmekifIZFVHw4HnQCaIVmpXQiYJ27usQpNv7v1kCVanOyqo1X-d-N4msUKnq/exec"},
+ {label:"Kenderaan2026",           url:"https://script.google.com/macros/s/AKfycby0eimKxmekifIZFVHw4HnQCaIVmpXQiYJ27usQpNv7v1kCVanOyqo1X-d-N4msUKnq/exec"},
  {label:"PermohonanKenderaan2026", url:"https://script.google.com/macros/s/AKfycbxH7koKK9pRbqBtk8XSgDEBYI-za0GApr8QW-cWCOcNFmmvTubTVlh5AIpUlCJPL78T/exec"},
  {label:"Projektor2026",           url:"https://script.google.com/macros/s/AKfycbwp9cqsZMSqcRrB04SQLWtkR0ryjATCw113ES2cogQ3A1jlD8XOLyJ0hQ1hNJCmTknf/exec"}
 ];
 
-// Semua variasi nama field standard (huruf besar/kecil) — TIDAK dipapar dalam Item Diminta
 const SKIP_FIELDS = [
  'timestamp','nama','jabatan','jenispermohonan',
  'jenis_permohonan','email','notelefon','no_telefon','_jenis'
@@ -253,40 +253,51 @@ function formatDateTime(val){
  return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
 }
 
+// ✅ FIX 2: formatValue diperbaiki supaya masa = masa sahaja, tarikh = tarikh sahaja
 function formatValue(val){
  if(val===null||val===undefined) return '-';
  const str=String(val).trim();
  if(str===''||str==='-') return '-';
 
- // Masa sahaja Google Sheets: 1899-12-30Txx:xx:xx.000Z
+ // ✅ Masa sahaja dari Google Sheets — simpan sebagai 1899-12-30Txx:xx:xx.000Z
+ // Buang tarikh 1899, papar masa sahaja dalam format HH:MM
  if(/^1899-12-30T/i.test(str)){
   const d=new Date(str);
   if(!isNaN(d)){
    return String(d.getUTCHours()).padStart(2,'0')+':'+
-          String(d.getUTCMinutes()).padStart(2,'0')+':'+
-          String(d.getUTCSeconds()).padStart(2,'0');
+          String(d.getUTCMinutes()).padStart(2,'0');
   }
  }
- // Tarikh penuh ISO
+
+ // ✅ Tarikh penuh ISO — papar tarikh + masa
  if(/^\d{4}-\d{2}-\d{2}T/i.test(str)){
   const d=new Date(str);
   if(!isNaN(d)){
-   return String(d.getDate()).padStart(2,'0')+'/'+
-          String(d.getMonth()+1).padStart(2,'0')+'/'+
-          d.getFullYear()+' '+
-          String(d.getHours()).padStart(2,'0')+':'+
-          String(d.getMinutes()).padStart(2,'0');
+   // Kalau masa = 00:00, kemungkinan ini tarikh sahaja — papar tarikh sahaja
+   const hh=d.getHours(), mn=d.getMinutes();
+   const dateStr=String(d.getDate()).padStart(2,'0')+'/'+
+                 String(d.getMonth()+1).padStart(2,'0')+'/'+
+                 d.getFullYear();
+   if(hh===0 && mn===0) return dateStr;
+   return dateStr+' '+String(hh).padStart(2,'0')+':'+String(mn).padStart(2,'0');
   }
  }
- // Tarikh sahaja YYYY-MM-DD
+
+ // ✅ Tarikh sahaja YYYY-MM-DD
  if(/^\d{4}-\d{2}-\d{2}$/.test(str)){
   const [y,m,d]=str.split('-');
   return `${d}/${m}/${y}`;
  }
+
+ // ✅ Masa sahaja HH:MM atau HH:MM:SS (string biasa)
+ if(/^\d{1,2}:\d{2}(:\d{2})?$/.test(str)){
+  const parts=str.split(':');
+  return parts[0].padStart(2,'0')+':'+parts[1].padStart(2,'0');
+ }
+
  return str;
 }
 
-// Ambil nilai field — cuba pelbagai variasi nama
 function getField(row,...keys){
  for(const k of keys){
   const v=row[k];
@@ -296,12 +307,10 @@ function getField(row,...keys){
  return '-';
 }
 
-// Ambil timestamp
 function getTimestamp(row){
  return row['Timestamp']||row['timestamp']||row['TIMESTAMP']||'';
 }
 
-// Bina Item Diminta — papar semua field kecuali yang standard
 function extractItems(row){
  const items=[];
  for(const key in row){
@@ -359,6 +368,14 @@ function filterData(){
  updateDash();
 }
 
+// Label papar untuk jenis
+const jenisLabel={
+ 'AlatTulis2026':           'AlatTulis2026',
+ 'Kenderaan2026':           'PenggunaanKenderaan2026',
+ 'PermohonanKenderaan2026': 'PermohonanKenderaan2026',
+ 'Projektor2026':           'Projektor2026',
+};
+
 function render(){
  const tbody=document.getElementById('tableData');
  if(!filtered.length){
@@ -368,7 +385,7 @@ function render(){
  tbody.innerHTML=filtered.map((row,i)=>`
   <tr>
    <td>${i+1}</td>
-   <td>${row._jenis}</td>
+   <td>${jenisLabel[row._jenis]||row._jenis}</td>
    <td>${getField(row,'Nama','nama')}</td>
    <td>${getField(row,'Jabatan','jabatan')}</td>
    <td class="item-list">${extractItems(row)}</td>
@@ -380,7 +397,7 @@ function exportExcel(){
  if(!filtered.length) return alert('Tiada data untuk dieksport');
  const strip=s=>s.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
  const ws=XLSX.utils.json_to_sheet(filtered.map(row=>({
-  JenisPermohonan:row._jenis,
+  JenisPermohonan: jenisLabel[row._jenis]||row._jenis,
   Nama:getField(row,'Nama','nama'),
   Jabatan:getField(row,'Jabatan','jabatan'),
   ItemDiminta:strip(extractItems(row)),
@@ -404,5 +421,3 @@ document.addEventListener('DOMContentLoaded',generateQR);
 
 </body>
 </html>
-
-
