@@ -405,27 +405,27 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
   };
 
   if(jenis === 'alat_tulis'){
-    data['Jenis Alatan'] = document.getElementById('item').value     || '-';
-    data['Kuantiti']     = document.getElementById('kuantiti').value || '-';
+    data.jenis_alatan = document.getElementById('item').value     || '-';
+    data.kuantiti    = document.getElementById('kuantiti').value || '-';
 
   } else if(jenis === 'kenderaan'){
-    data['Jenis Kenderaan'] = document.getElementById('jenisKenderaan').value || '-';
-    data.masa = masa.value \\'-';
-    data['Nama Pemandu']    = document.getElementById('namaPemandu').value    || '-';
-    data['Lokasi']          = document.getElementById('lokasi').value         || '-';
-    data['Tujuan']          = document.getElementById('tujuan').value         || '-';
-    data['Bacaan Odometer'] = document.getElementById('bacaanOdo').value      || '-';
+    data.jenis_kenderaan = document.getElementById('jenisKenderaan').value || '-';
+    data.masa = document.getElementById('masa').value  || '-';
+    data.nama_pemandu   = document.getElementById('namaPemandu').value    || '-';
+    data.lokasi       = document.getElementById('lokasi').value         || '-';
+    data.tujuan         = document.getElementById('tujuan').value         || '-';
+    data.bacaan_odometer = document.getElementById('bacaanOdo').value      || '-';
 
   } else if(jenis === 'permohonan_kenderaan'){
-    data['Jenis Kenderaan'] = document.getElementById('pgJenisKenderaan').value || '-';
-    data['Nama Pemandu']    = document.getElementById('pgNamaPemandu').value    || '-';
-    data['Lokasi']          = document.getElementById('pgLokasi').value         || '-';
-    data['Tujuan']          = document.getElementById('pgTujuan').value         || '-';
-    data['Tarikh']          = document.getElementById('pgTarikh').value         || '-';
-    data['Masa']            = formatTime24(document.getElementById('pgMasa').value);
+    data.jenis_kenderaan'] = document.getElementById('pgJenisKenderaan').value || '-';
+    data.nama_pemandu']    = document.getElementById('pgNamaPemandu').value    || '-';
+    data.lokasi          = document.getElementById('pgLokasi').value         || '-';
+    data.tujuan          = document.getElementById('pgTujuan').value         || '-';
+    data.tarikh          = document.getElementById('pgTarikh').value         || '-';
+    data.masa            = formatTime24(document.getElementById('pgMasa').value);
 
   } else if(jenis === 'projektor'){
-    data['No Projektor'] = document.getElementById('noProjektor').value || '-';
+    data.no_projektor = document.getElementById('noProjektor').value || '-';
   }
 
   try {
@@ -500,6 +500,7 @@ const submitBtn = document.getElementById('submitBtn');
 
 </body>
 </html>
+
 
 
 
