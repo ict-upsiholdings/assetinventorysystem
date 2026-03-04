@@ -110,6 +110,137 @@ button:disabled{opacity:.6;cursor:not-allowed}
   position:absolute;right:12px;top:50%;transform:translateY(-50%);
   font-size:12px;color:var(--muted);
 }
+
+/* Clock Picker */
+.clock-trigger{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  background:#fff;
+  cursor:pointer;
+  font-size:15px;
+  font-weight:600;
+  color:var(--bg1);
+  transition:border-color .2s,box-shadow .2s;
+  width:100%;
+  user-select:none;
+}
+.clock-trigger:hover{border-color:var(--bg2);box-shadow:0 0 0 3px rgba(31,162,255,.15);}
+.clock-trigger .ct-icon{font-size:18px;}
+.clock-trigger .ct-time{flex:1;}
+.clock-trigger .ct-placeholder{color:#9ca3af;font-weight:400;}
+
+.clock-overlay{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.45);
+  z-index:9999;
+  justify-content:center;
+  align-items:center;
+}
+.clock-overlay.active{display:flex;}
+
+.clock-modal{
+  background:#fff;
+  border-radius:24px;
+  padding:28px 24px 22px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
+  width:300px;
+  animation:popIn .22s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+.clock-display{
+  text-align:center;
+  margin-bottom:18px;
+}
+.clock-display .cd-label{
+  font-size:12px;font-weight:600;letter-spacing:.08em;
+  color:var(--muted);text-transform:uppercase;margin-bottom:4px;
+}
+.clock-hm{
+  display:flex;justify-content:center;align-items:center;gap:2px;
+  font-size:48px;font-weight:700;color:var(--bg1);line-height:1;
+}
+.clock-hm .hm-sep{opacity:.4;margin:0 2px;}
+.hm-part{
+  padding:4px 10px;border-radius:10px;cursor:pointer;transition:background .15s;
+}
+.hm-part:hover{background:#eef6ff;}
+.hm-part.active{background:var(--bg1);color:#fff;border-radius:10px;}
+
+.ampm-row{
+  display:flex;justify-content:center;gap:8px;margin-top:8px;
+}
+.ampm-btn{
+  padding:6px 18px;border-radius:20px;border:2px solid #e5e7eb;
+  font-weight:700;font-size:14px;cursor:pointer;background:#fff;
+  color:var(--muted);transition:all .15s;width:auto;
+}
+.ampm-btn.active{
+  background:var(--bg2);border-color:var(--bg2);color:#fff;
+}
+
+/* Clock face */
+.clock-face-wrap{
+  position:relative;width:220px;height:220px;margin:0 auto 16px;
+}
+.clock-face{
+  width:100%;height:100%;border-radius:50%;
+  background:#f4f6f8;
+  border:2px solid #e5e7eb;
+  position:relative;cursor:pointer;
+}
+.clock-center{
+  position:absolute;top:50%;left:50%;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--bg1);
+  transform:translate(-50%,-50%);z-index:3;
+}
+.clock-hand{
+  position:absolute;bottom:50%;left:50%;
+  transform-origin:bottom center;
+  border-radius:4px 4px 0 0;
+  z-index:2;
+}
+.hand-hour{
+  width:5px;height:62px;
+  background:var(--bg1);
+  margin-left:-2.5px;
+}
+.hand-min{
+  width:3px;height:82px;
+  background:var(--bg2);
+  margin-left:-1.5px;
+}
+.clock-tick{
+  position:absolute;top:50%;left:50%;
+  font-size:11px;font-weight:700;color:var(--bg1);
+  transform-origin:0 0;
+  display:flex;align-items:center;justify-content:center;
+  width:24px;height:24px;
+  border-radius:50%;
+  cursor:pointer;
+  transition:background .12s,color .12s;
+  user-select:none;
+}
+.clock-tick:hover{background:rgba(31,162,255,.15);}
+.clock-tick.selected{background:var(--bg1);color:#fff;}
+
+.clock-actions{
+  display:flex;gap:8px;margin-top:4px;
+}
+.clock-actions button{
+  flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:14px;
+  border:none;cursor:pointer;margin-top:0;
+}
+.btn-cancel{background:#f3f4f6;color:var(--bg1);}
+.btn-cancel:hover{background:#e5e7eb;opacity:1;}
+.btn-ok{background:linear-gradient(135deg,var(--bg2),var(--accent));color:#fff;}
+.btn-ok:hover{opacity:.9;}
 </style>
 </head>
 
@@ -257,7 +388,6 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <input type="text" id="pgTujuan" placeholder="Tujuan">
     </div>
 
-    
     <!-- ═══════════════════════════════
          PROJEKTOR
     ═══════════════════════════════ -->
@@ -383,14 +513,10 @@ function setupAutocomplete(){
 
 /* ── Show/hide fields ikut jenis ── */
 const allWraps = [
-  // Alat Tulis
   'wrap_item','wrap_kuantiti',
-  // Kenderaan Penggunaan
   'wrap_jenisKenderaan','wrap_masa','wrap_namaPemandu','wrap_lokasi','wrap_tujuan','wrap_bacaanOdo',
-  // Permohonan Kenderaan
   'wrap_pgJenisKenderaan','wrap_pgTarikhPergi','wrap_pgTarikhBalik','wrap_pgMasa',
   'wrap_pgNamaPemandu','wrap_pgLokasi','wrap_pgTujuan',
-  // Projektor
   'wrap_noProjektor'
 ];
 
@@ -399,8 +525,13 @@ function updateFieldsByJenis(jenis){
     const el = document.getElementById(id);
     if(el){
       el.classList.add('hidden');
-        el.querySelectorAll('input,select').forEach(inp => inp.value = '');
+      el.querySelectorAll('input,select').forEach(inp => inp.value = '');
     }
+  });
+  // Reset clock displays
+  ['clockDisplay','clockDisplayKend'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.textContent = 'Pilih masa...'; el.classList.add('ct-placeholder'); }
   });
 
   if(jenis === 'alat_tulis'){
@@ -416,8 +547,6 @@ function updateFieldsByJenis(jenis){
     show('wrap_bacaanOdo');
   }
   if(jenis === 'permohonan_kenderaan'){
-    // ✅ Field baru: Tarikh Pergi + Tarikh Balik
-    // ✅ Buang: Jenis Kenderaan
     show('wrap_pgJenisKenderaan');
     show('wrap_pgTarikhPergi');
     show('wrap_pgTarikhBalik');
@@ -449,6 +578,101 @@ document.getElementById('pgTarikhBalik').addEventListener('change', function(){
   }
 });
 
+/* ── Clock Picker Logic (reusable) ── */
+let clockMode    = 'hour';
+let clockHour    = 12;
+let clockMin     = 0;
+let clockAmPm    = 'AM';
+let clockTargetValueId = null;  // hidden input id
+let clockTargetDisplayId = null; // display span id
+
+function buildClockFace(){
+  const face = document.getElementById('clockFace');
+  face.querySelectorAll('.clock-tick').forEach(t => t.remove());
+  const cx = 110, cy = 110, r = 88;
+  const isHour = clockMode === 'hour';
+  for(let i = 0; i < 12; i++){
+    const val   = isHour ? (i === 0 ? 12 : i) : i * 5;
+    const label = isHour ? String(val) : String(val).padStart(2,'0');
+    const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    const tick = document.createElement('div');
+    tick.className = 'clock-tick' + ((isHour && clockHour === val) || (!isHour && clockMin === val) ? ' selected' : '');
+    tick.textContent = label;
+    tick.style.left = (x - 12) + 'px';
+    tick.style.top  = (y - 12) + 'px';
+    tick.style.position = 'absolute';
+    tick.addEventListener('click', e => {
+      e.stopPropagation();
+      if(isHour){ clockHour = val; switchToMin(); }
+      else       { clockMin  = val; updateClockUI(); }
+    });
+    face.appendChild(tick);
+  }
+  updateClockHands();
+}
+
+function updateClockHands(){
+  const isHour = clockMode === 'hour';
+  const hh = document.getElementById('handHour');
+  const hm = document.getElementById('handMin');
+  hh.style.transform = `rotate(${((clockHour % 12) / 12) * 360}deg)`;
+  hm.style.transform = `rotate(${(clockMin / 60) * 360}deg)`;
+  hh.classList.toggle('hidden', !isHour);
+  hm.classList.toggle('hidden', isHour);
+}
+
+function updateClockUI(){
+  document.getElementById('hmHour').textContent = String(clockHour).padStart(2,'0');
+  document.getElementById('hmMin').textContent  = String(clockMin).padStart(2,'0');
+  document.getElementById('hmHour').classList.toggle('active', clockMode === 'hour');
+  document.getElementById('hmMin').classList.toggle('active',  clockMode === 'min');
+  document.getElementById('clockModeLabel').textContent = clockMode === 'hour' ? 'Pilih Jam' : 'Pilih Minit';
+  document.getElementById('btnAM').classList.toggle('active', clockAmPm === 'AM');
+  document.getElementById('btnPM').classList.toggle('active', clockAmPm === 'PM');
+  buildClockFace();
+}
+
+function switchToMin(){ clockMode = 'min'; updateClockUI(); }
+
+function openClock(targetValueId, targetDisplayId){
+  clockTargetValueId   = targetValueId;
+  clockTargetDisplayId = targetDisplayId;
+  // Pre-fill from existing value
+  const existing = document.getElementById(targetValueId).value;
+  if(existing){
+    const parts = existing.split(/[: ]/);
+    clockHour  = parseInt(parts[0]) || 12;
+    clockMin   = parseInt(parts[1]) || 0;
+    clockAmPm  = parts[2] || 'AM';
+  } else {
+    clockHour = 12; clockMin = 0; clockAmPm = 'AM';
+  }
+  clockMode = 'hour';
+  updateClockUI();
+  document.getElementById('clockOverlay').classList.add('active');
+}
+
+function closeClock(){ document.getElementById('clockOverlay').classList.remove('active'); }
+
+function confirmClock(){
+  const h   = String(clockHour).padStart(2,'0');
+  const m   = String(clockMin).padStart(2,'0');
+  const val = `${h}:${m} ${clockAmPm}`;
+  document.getElementById(clockTargetValueId).value = val;
+  const disp = document.getElementById(clockTargetDisplayId);
+  disp.textContent = val;
+  disp.classList.remove('ct-placeholder');
+  closeClock();
+}
+
+// Click on face to set by angle
+/* ── Helper: get 12h masa string ── */
+function getMasa12h(){
+  return document.getElementById('pgMasaValue').value || null;
+}
+
 /* ── Submit form ── */
 document.getElementById('assetForm').addEventListener('submit', async e => {
   e.preventDefault();
@@ -465,12 +689,12 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
   if(jenis === 'permohonan_kenderaan'){
     const tPergi = document.getElementById('pgTarikhPergi').value;
     const tBalik = document.getElementById('pgTarikhBalik').value;
-    const masa   = document.getElementById('pgMasa').value;
+    const masa   = getMasa12h();
     const lokasi = document.getElementById('pgLokasi').value.trim();
     const tujuan = document.getElementById('pgTujuan').value.trim();
     if(!tPergi)  return showMessage('Sila isi Tarikh Pergi', 'warning');
     if(!tBalik)  return showMessage('Sila isi Tarikh Balik', 'warning');
-    if(!masa)    return showMessage('Sila isi Masa', 'warning');
+    if(!masa)    return showMessage('Sila isi Masa (Jam dan Minit)', 'warning');
     if(!lokasi)  return showMessage('Sila isi Lokasi', 'warning');
     if(!tujuan)  return showMessage('Sila isi Tujuan', 'warning');
   }
@@ -489,24 +713,20 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
 
   } else if(jenis === 'kenderaan'){
     data.jenis_kenderaan = document.getElementById('jenisKenderaan').value || '-';
-    data.masa            = document.getElementById('masa').value           || '-';
+    data.masa            = document.getElementById('masaValue').value      || '-';
     data.nama_pemandu    = document.getElementById('namaPemandu').value    || '-';
     data.lokasi          = document.getElementById('lokasi').value         || '-';
     data.tujuan          = document.getElementById('tujuan').value         || '-';
     data.bacaan_odometer = document.getElementById('bacaanOdo').value      || '-';
 
   } else if(jenis === 'permohonan_kenderaan'){
-    // ✅ Data: Nama, Jabatan, Jenis Kenderaan, Tarikh Pergi, Tarikh Balik, Masa,
-    //          Nama Pemandu, Lokasi, Tujuan, Timestamp
     data.jenis_kenderaan = document.getElementById('pgJenisKenderaan').value || '-';
-    data.tarikh_pergi  = document.getElementById('pgTarikhPergi').value  || '-';
-    data.tarikh_balik  = document.getElementById('pgTarikhBalik').value  || '-';
-    const masaVal = document.getElementById('pgMasa').value;
-    const ampm    = document.getElementById('pgMasaAmPm').value;
-    data.masa = masaVal ? masaVal + ' ' + ampm : '-';
-    data.nama_pemandu  = document.getElementById('pgNamaPemandu').value  || '-';
-    data.lokasi        = document.getElementById('pgLokasi').value       || '-';
-    data.tujuan        = document.getElementById('pgTujuan').value       || '-';
+    data.tarikh_pergi    = document.getElementById('pgTarikhPergi').value    || '-';
+    data.tarikh_balik    = document.getElementById('pgTarikhBalik').value    || '-';
+    data.masa            = getMasa12h() || '-';
+    data.nama_pemandu    = document.getElementById('pgNamaPemandu').value    || '-';
+    data.lokasi          = document.getElementById('pgLokasi').value         || '-';
+    data.tujuan          = document.getElementById('pgTujuan').value         || '-';
 
   } else if(jenis === 'projektor'){
     data.no_projektor = document.getElementById('noProjektor').value || '-';
@@ -558,6 +778,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadNames();
   setupAutocomplete();
 
+  // Clock picker events
+  document.getElementById('clockFace').addEventListener('click', function(e){
+    if(e.target.classList.contains('clock-tick')) return;
+    const rect = this.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width/2;
+    const y = e.clientY - rect.top  - rect.height/2;
+    let angle = Math.atan2(y, x) + Math.PI/2;
+    if(angle < 0) angle += 2 * Math.PI;
+    if(clockMode === 'hour'){
+      let h = Math.round(angle / (2*Math.PI) * 12);
+      if(h === 0) h = 12;
+      clockHour = h;
+      switchToMin();
+    } else {
+      let m = Math.round(angle / (2*Math.PI) * 60);
+      if(m === 60) m = 0;
+      m = Math.round(m / 5) * 5;
+      if(m === 60) m = 0;
+      clockMin = m;
+      updateClockUI();
+    }
+  });
+  document.getElementById('clockTrigger').addEventListener('click', () => openClock('pgMasaValue', 'clockDisplay'));
+  document.getElementById('clockTriggerKend').addEventListener('click', () => openClock('masaValue', 'clockDisplayKend'));
+  document.getElementById('clockCancel').addEventListener('click', closeClock);
+  document.getElementById('clockOk').addEventListener('click', confirmClock);
+  document.getElementById('clockOverlay').addEventListener('click', function(e){
+    if(e.target === this) closeClock();
+  });
+  document.getElementById('hmHour').addEventListener('click', () => { clockMode = 'hour'; updateClockUI(); });
+  document.getElementById('hmMin').addEventListener('click',  () => { clockMode = 'min';  updateClockUI(); });
+  document.getElementById('btnAM').addEventListener('click',  () => { clockAmPm = 'AM'; updateClockUI(); });
+  document.getElementById('btnPM').addEventListener('click',  () => { clockAmPm = 'PM'; updateClockUI(); });
+
   const params      = new URLSearchParams(window.location.search);
   const jenisParam  = params.get('jenis');
   const mappedJenis = jenisParam ? (jenisMap[jenisParam] || '') : '';
@@ -586,4 +840,3 @@ const submitBtn = document.getElementById('submitBtn');
 
 </body>
 </html>
-
