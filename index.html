@@ -632,19 +632,30 @@ function closeClock(){
 
 // Dalam confirmClock() — tukar kepada:
 function confirmClock(){
-  const h   = String(clockHour);          // Tiada leading zero: "3" bukan "03"
-  const m   = String(clockMin).padStart(2,'0');
-  const val = `${h}:${m} ${clockAmPm}`;  // Contoh: "3:00 PM" atau "12:00 AM"
-  document.getElementById(clockTargetValueId).value = val;
+
+  // Force 12H format
+  let hour12 = clockHour;
+  if(hour12 === 0) hour12 = 12;
+  if(hour12 > 12)  hour12 = hour12 - 12;
+
+  const h = String(hour12);           
+  const m = String(clockMin).padStart(2,'0');
+  const val = `${h}:${m} ${clockAmPm}`;   // contoh: 3:00 PM
+
+  // Simpan sebagai STRING literal (elak auto convert)
+  document.getElementById(clockTargetValueId).value = val.trim();
+
   const disp = document.getElementById(clockTargetDisplayId);
   disp.textContent = val;
   disp.classList.remove('ct-placeholder');
+
   closeClock();
 }
 
 /* ── Helper ── */
 function getMasaById(id){
-  return document.getElementById(id).value || null;
+  const v = document.getElementById(id).value;
+  return v ? String(v).trim() : null;   // Force string
 }
 
 /* ── Submit ── */
@@ -687,7 +698,9 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
 
   } else if(jenis === 'kenderaan'){
     data.jenis_kenderaan = document.getElementById('jenisKenderaan').value || '-';
-    data.masa            = getMasaById('masaValue')                        || '-';
+    data.masa = getMasaById('masaValue') ? 
+            "'" + getMasaById('masaValue') : 
+            '-';
     data.nama_pemandu    = document.getElementById('namaPemandu').value    || '-';
     data.lokasi          = document.getElementById('lokasi').value         || '-';
     data.tujuan          = document.getElementById('tujuan').value         || '-';
@@ -697,7 +710,9 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
     data.jenis_kenderaan = document.getElementById('pgJenisKenderaan').value || '-';
     data.tarikh_pergi    = document.getElementById('pgTarikhPergi').value    || '-';
     data.tarikh_balik    = document.getElementById('pgTarikhBalik').value    || '-';
-    data.masa            = getMasaById('pgMasaValue')                        || '-';
+    data.masa = getMasaById('pgMasaValue') ? 
+            "'" + getMasaById('pgMasaValue') : 
+            '-';
     data.nama_pemandu    = document.getElementById('pgNamaPemandu').value    || '-';
     data.lokasi          = document.getElementById('pgLokasi').value         || '-';
     data.tujuan          = document.getElementById('pgTujuan').value         || '-';
@@ -817,5 +832,6 @@ const submitBtn = document.getElementById('submitBtn');
 
 </body>
 </html>
+
 
 
