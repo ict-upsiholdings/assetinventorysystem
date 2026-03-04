@@ -630,10 +630,11 @@ function closeClock(){
   document.getElementById('clockOverlay').classList.remove('active');
 }
 
+// Dalam confirmClock() — tukar kepada:
 function confirmClock(){
-  const h   = String(clockHour).padStart(2,'0');
+  const h   = String(clockHour);          // Tiada leading zero: "3" bukan "03"
   const m   = String(clockMin).padStart(2,'0');
-  const val = `${h}:${m} ${clockAmPm}`;
+  const val = `${h}:${m} ${clockAmPm}`;  // Contoh: "3:00 PM" atau "12:00 AM"
   document.getElementById(clockTargetValueId).value = val;
   const disp = document.getElementById(clockTargetDisplayId);
   disp.textContent = val;
@@ -816,3 +817,4 @@ const submitBtn = document.getElementById('submitBtn');
 
 </body>
 </html>
+
