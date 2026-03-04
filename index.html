@@ -276,9 +276,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <option value="projektor">Projektor</option>
     </select>
 
-    <!-- ═══════════════════════════════
-         ALAT TULIS
-    ═══════════════════════════════ -->
+    <!-- ALAT TULIS -->
     <div id="wrap_item" class="hidden">
       <label>Jenis Alatan</label>
       <input type="text" id="item" placeholder="Contoh: Pen, Kertas A4...">
@@ -288,9 +286,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <input type="number" id="kuantiti" placeholder="Kuantiti" min="1">
     </div>
 
-    <!-- ═══════════════════════════════
-         KENDERAAN PENGGUNAAN
-    ═══════════════════════════════ -->
+    <!-- KENDERAAN PENGGUNAAN -->
     <div id="wrap_jenisKenderaan" class="hidden">
       <label>Jenis Kenderaan</label>
       <input type="text" id="jenisKenderaan" placeholder="Contoh: Van">
@@ -320,9 +316,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <input type="number" id="bacaanOdo" placeholder="Bacaan Odometer (km)">
     </div>
 
-    <!-- ═══════════════════════════════
-         PERMOHONAN KENDERAAN
-    ═══════════════════════════════ -->
+    <!-- PERMOHONAN KENDERAAN -->
     <div id="wrap_pgJenisKenderaan" class="hidden">
       <label>Jenis Kenderaan</label>
       <input type="text" id="pgJenisKenderaan" placeholder="Contoh: Van, Kereta...">
@@ -335,8 +329,6 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <label>Tarikh Balik <span style="color:red">*</span></label>
       <input type="date" id="pgTarikhBalik">
     </div>
-
-    <!-- ✅ Clock Picker -->
     <div id="wrap_pgMasa" class="hidden">
       <label>Masa <span style="color:red">*</span></label>
       <div class="clock-trigger" id="clockTrigger">
@@ -346,7 +338,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <input type="hidden" id="pgMasaValue">
     </div>
 
-    <!-- Clock Modal -->
+    <!-- Clock Modal (shared) -->
     <div class="clock-overlay" id="clockOverlay">
       <div class="clock-modal">
         <div class="clock-display">
@@ -388,16 +380,13 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <input type="text" id="pgTujuan" placeholder="Tujuan">
     </div>
 
-    <!-- ═══════════════════════════════
-         PROJEKTOR
-    ═══════════════════════════════ -->
+    <!-- PROJEKTOR -->
     <div id="wrap_noProjektor" class="hidden">
       <label>No Projektor</label>
       <input type="text" id="noProjektor" placeholder="No Projektor">
     </div>
 
     <input type="hidden" id="timestamp">
-
     <button type="submit" id="submitBtn">Hantar</button>
   </form>
 
@@ -444,15 +433,14 @@ async function loadNames(){
       for(let k in r) o[k.trim()] = r[k];
       return o;
     });
-    console.log('✅ Nama berjaya dimuatkan:', namesData.length, 'rekod');
   } catch(e) {
-    console.warn('⚠️ Gagal load nama:', e);
+    console.warn('Gagal load nama:', e);
   } finally {
     document.getElementById('namaLoading').style.display = 'none';
     document.getElementById('namaInput').placeholder = namesData.length
       ? 'Taip untuk cari nama...'
       : 'Taip nama anda...';
-    if(!namesData.length) {
+    if(!namesData.length){
       const jab = document.getElementById('jabatan');
       jab.removeAttribute('readonly');
       jab.style.background = '';
@@ -478,23 +466,17 @@ function setupAutocomplete(){
   nama.addEventListener('input', () => {
     const q = nama.value.trim();
     jab.value = '';
-
     if(!q || !namesData.length){ drop.classList.add('hidden'); return; }
-
     const filtered = namesData.filter(x =>
       (x.Nama||'').toLowerCase().includes(q.toLowerCase())
-    ).slice(0, 20);
-
+    ).slice(0,20);
     drop.innerHTML = '';
     if(!filtered.length){ drop.classList.add('hidden'); return; }
-
     filtered.forEach(item => {
       const d = document.createElement('div');
       d.className = 'name-option';
       d.innerHTML = highlight(item.Nama, q) +
-        (item.Jabatan || item.Dept
-          ? `<br><small style="color:#6b7280">${item.Jabatan || item.Dept}</small>`
-          : '');
+        (item.Jabatan||item.Dept ? `<br><small style="color:#6b7280">${item.Jabatan||item.Dept}</small>` : '');
       d.onclick = () => {
         nama.value = item.Nama;
         jab.value  = item.Jabatan || item.Dept || '';
@@ -511,7 +493,7 @@ function setupAutocomplete(){
   });
 }
 
-/* ── Show/hide fields ikut jenis ── */
+/* ── Show/hide fields ── */
 const allWraps = [
   'wrap_item','wrap_kuantiti',
   'wrap_jenisKenderaan','wrap_masa','wrap_namaPemandu','wrap_lokasi','wrap_tujuan','wrap_bacaanOdo',
@@ -535,25 +517,15 @@ function updateFieldsByJenis(jenis){
   });
 
   if(jenis === 'alat_tulis'){
-    show('wrap_item');
-    show('wrap_kuantiti');
+    show('wrap_item'); show('wrap_kuantiti');
   }
   if(jenis === 'kenderaan'){
-    show('wrap_jenisKenderaan');
-    show('wrap_masa');
-    show('wrap_namaPemandu');
-    show('wrap_lokasi');
-    show('wrap_tujuan');
-    show('wrap_bacaanOdo');
+    show('wrap_jenisKenderaan'); show('wrap_masa'); show('wrap_namaPemandu');
+    show('wrap_lokasi'); show('wrap_tujuan'); show('wrap_bacaanOdo');
   }
   if(jenis === 'permohonan_kenderaan'){
-    show('wrap_pgJenisKenderaan');
-    show('wrap_pgTarikhPergi');
-    show('wrap_pgTarikhBalik');
-    show('wrap_pgMasa');
-    show('wrap_pgNamaPemandu');
-    show('wrap_pgLokasi');
-    show('wrap_pgTujuan');
+    show('wrap_pgJenisKenderaan'); show('wrap_pgTarikhPergi'); show('wrap_pgTarikhBalik');
+    show('wrap_pgMasa'); show('wrap_pgNamaPemandu'); show('wrap_pgLokasi'); show('wrap_pgTujuan');
   }
   if(jenis === 'projektor'){
     show('wrap_noProjektor');
@@ -569,22 +541,24 @@ document.getElementById('jenisSelect').addEventListener('change', function(){
   updateFieldsByJenis(this.value);
 });
 
-/* ── Validate tarikh balik >= tarikh pergi ── */
+/* ── Validate tarikh balik ── */
 document.getElementById('pgTarikhBalik').addEventListener('change', function(){
   const pergi = document.getElementById('pgTarikhPergi').value;
   if(pergi && this.value && this.value < pergi){
-    showMessage('⚠️ Tarikh Balik tidak boleh lebih awal dari Tarikh Pergi', 'warning');
+    showMessage('⚠️ Tarikh Balik tidak boleh lebih awal dari Tarikh Pergi','warning');
     this.value = '';
   }
 });
 
-/* ── Clock Picker Logic (reusable) ── */
-let clockMode    = 'hour';
-let clockHour    = 12;
-let clockMin     = 0;
-let clockAmPm    = 'AM';
-let clockTargetValueId = null;  // hidden input id
-let clockTargetDisplayId = null; // display span id
+/* ══════════════════════════════════════
+   CLOCK PICKER (reusable)
+══════════════════════════════════════ */
+let clockMode          = 'hour';
+let clockHour          = 12;
+let clockMin           = 0;
+let clockAmPm          = 'AM';
+let clockTargetValueId   = null;
+let clockTargetDisplayId = null;
 
 function buildClockFace(){
   const face = document.getElementById('clockFace');
@@ -598,15 +572,14 @@ function buildClockFace(){
     const x = cx + r * Math.cos(angle);
     const y = cy + r * Math.sin(angle);
     const tick = document.createElement('div');
-    tick.className = 'clock-tick' + ((isHour && clockHour === val) || (!isHour && clockMin === val) ? ' selected' : '');
+    tick.className = 'clock-tick' +
+      ((isHour && clockHour === val) || (!isHour && clockMin === val) ? ' selected' : '');
     tick.textContent = label;
-    tick.style.left = (x - 12) + 'px';
-    tick.style.top  = (y - 12) + 'px';
-    tick.style.position = 'absolute';
+    tick.style.cssText = `left:${x-12}px;top:${y-12}px;position:absolute;`;
     tick.addEventListener('click', e => {
       e.stopPropagation();
       if(isHour){ clockHour = val; switchToMin(); }
-      else       { clockMin  = val; updateClockUI(); }
+      else      { clockMin  = val; updateClockUI(); }
     });
     face.appendChild(tick);
   }
@@ -620,7 +593,7 @@ function updateClockHands(){
   hh.style.transform = `rotate(${((clockHour % 12) / 12) * 360}deg)`;
   hm.style.transform = `rotate(${(clockMin / 60) * 360}deg)`;
   hh.classList.toggle('hidden', !isHour);
-  hm.classList.toggle('hidden', isHour);
+  hm.classList.toggle('hidden',  isHour);
 }
 
 function updateClockUI(){
@@ -639,13 +612,12 @@ function switchToMin(){ clockMode = 'min'; updateClockUI(); }
 function openClock(targetValueId, targetDisplayId){
   clockTargetValueId   = targetValueId;
   clockTargetDisplayId = targetDisplayId;
-  // Pre-fill from existing value
   const existing = document.getElementById(targetValueId).value;
   if(existing){
     const parts = existing.split(/[: ]/);
-    clockHour  = parseInt(parts[0]) || 12;
-    clockMin   = parseInt(parts[1]) || 0;
-    clockAmPm  = parts[2] || 'AM';
+    clockHour = parseInt(parts[0]) || 12;
+    clockMin  = parseInt(parts[1]) || 0;
+    clockAmPm = parts[2] || 'AM';
   } else {
     clockHour = 12; clockMin = 0; clockAmPm = 'AM';
   }
@@ -654,7 +626,9 @@ function openClock(targetValueId, targetDisplayId){
   document.getElementById('clockOverlay').classList.add('active');
 }
 
-function closeClock(){ document.getElementById('clockOverlay').classList.remove('active'); }
+function closeClock(){
+  document.getElementById('clockOverlay').classList.remove('active');
+}
 
 function confirmClock(){
   const h   = String(clockHour).padStart(2,'0');
@@ -667,36 +641,35 @@ function confirmClock(){
   closeClock();
 }
 
-// Click on face to set by angle
-/* ── Helper: get 12h masa string ── */
-function getMasa12h(id){
+/* ── Helper ── */
+function getMasaById(id){
   return document.getElementById(id).value || null;
 }
-  
-/* ── Submit form ── */
+
+/* ── Submit ── */
 document.getElementById('assetForm').addEventListener('submit', async e => {
   e.preventDefault();
 
-  const jenis = document.getElementById('jenisSelect').value;
-  if(!jenis) return showMessage('Sila pilih jenis aset', 'warning');
+  const jenis   = document.getElementById('jenisSelect').value;
+  if(!jenis) return showMessage('Sila pilih jenis aset','warning');
 
   const namaVal = document.getElementById('namaInput').value.trim();
   const jabVal  = document.getElementById('jabatan').value.trim();
-  if(!namaVal) return showMessage('Sila masukkan nama', 'warning');
-  if(!jabVal)  return showMessage('Sila masukkan jabatan', 'warning');
+  if(!namaVal) return showMessage('Sila masukkan nama','warning');
+  if(!jabVal)  return showMessage('Sila masukkan jabatan','warning');
 
   // Validate permohonan kenderaan
   if(jenis === 'permohonan_kenderaan'){
     const tPergi = document.getElementById('pgTarikhPergi').value;
     const tBalik = document.getElementById('pgTarikhBalik').value;
-    const masa   = getMasa12h();
+    const masa   = getMasaById('pgMasaValue');
     const lokasi = document.getElementById('pgLokasi').value.trim();
     const tujuan = document.getElementById('pgTujuan').value.trim();
-    if(!tPergi)  return showMessage('Sila isi Tarikh Pergi', 'warning');
-    if(!tBalik)  return showMessage('Sila isi Tarikh Balik', 'warning');
-    if(!masa)    return showMessage('Sila isi Masa (Jam dan Minit)', 'warning');
-    if(!lokasi)  return showMessage('Sila isi Lokasi', 'warning');
-    if(!tujuan)  return showMessage('Sila isi Tujuan', 'warning');
+    if(!tPergi)  return showMessage('Sila isi Tarikh Pergi','warning');
+    if(!tBalik)  return showMessage('Sila isi Tarikh Balik','warning');
+    if(!masa)    return showMessage('Sila isi Masa','warning');
+    if(!lokasi)  return showMessage('Sila isi Lokasi','warning');
+    if(!tujuan)  return showMessage('Sila isi Tujuan','warning');
   }
 
   submitBtn.disabled = true;
@@ -713,7 +686,7 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
 
   } else if(jenis === 'kenderaan'){
     data.jenis_kenderaan = document.getElementById('jenisKenderaan').value || '-';
-    data.masa = getMasa12h('masaValue') || '-';
+    data.masa            = getMasaById('masaValue')                        || '-';
     data.nama_pemandu    = document.getElementById('namaPemandu').value    || '-';
     data.lokasi          = document.getElementById('lokasi').value         || '-';
     data.tujuan          = document.getElementById('tujuan').value         || '-';
@@ -723,7 +696,7 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
     data.jenis_kenderaan = document.getElementById('pgJenisKenderaan').value || '-';
     data.tarikh_pergi    = document.getElementById('pgTarikhPergi').value    || '-';
     data.tarikh_balik    = document.getElementById('pgTarikhBalik').value    || '-';
-    data.masa = getMasa12h('pgMasaValue') || '-';
+    data.masa            = getMasaById('pgMasaValue')                        || '-';
     data.nama_pemandu    = document.getElementById('pgNamaPemandu').value    || '-';
     data.lokasi          = document.getElementById('pgLokasi').value         || '-';
     data.tujuan          = document.getElementById('pgTujuan').value         || '-';
@@ -735,12 +708,12 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
   try {
     const res = await fetch(POST_API[jenis], {
       method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
       body: new URLSearchParams({data: JSON.stringify(data)})
     });
     const r = await res.json();
     if(r.status === 'success'){
-      showMessage('✓ Permohonan berjaya dihantar!', 'success');
+      showMessage('✓ Permohonan berjaya dihantar!','success');
       e.target.reset();
       document.getElementById('jabatan').value = '';
       updateFieldsByJenis('');
@@ -755,11 +728,11 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
         }
       }
     } else {
-      showMessage('✗ Gagal hantar. Cuba lagi.', 'error');
+      showMessage('✗ Gagal hantar. Cuba lagi.','error');
     }
-  } catch(err) {
+  } catch(err){
     console.error(err);
-    showMessage('✗ Ralat sambungan. Sila cuba lagi.', 'error');
+    showMessage('✗ Ralat sambungan. Sila cuba lagi.','error');
   } finally {
     submitBtn.disabled = false;
   }
@@ -767,8 +740,8 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
 
 function showMessage(msg, type){
   const el = document.getElementById('message');
-  el.textContent = msg;
-  el.className   = `message ${type}`;
+  el.textContent   = msg;
+  el.className     = `message ${type}`;
   el.style.display = 'block';
   if(type === 'success') setTimeout(() => el.style.display = 'none', 5000);
 }
@@ -778,40 +751,44 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadNames();
   setupAutocomplete();
 
-  // Clock picker events
+  // Clock face click (set by angle)
   document.getElementById('clockFace').addEventListener('click', function(e){
     if(e.target.classList.contains('clock-tick')) return;
     const rect = this.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width/2;
-    const y = e.clientY - rect.top  - rect.height/2;
-    let angle = Math.atan2(y, x) + Math.PI/2;
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top  - rect.height / 2;
+    let angle = Math.atan2(y, x) + Math.PI / 2;
     if(angle < 0) angle += 2 * Math.PI;
     if(clockMode === 'hour'){
-      let h = Math.round(angle / (2*Math.PI) * 12);
+      let h = Math.round(angle / (2 * Math.PI) * 12);
       if(h === 0) h = 12;
       clockHour = h;
       switchToMin();
     } else {
-      let m = Math.round(angle / (2*Math.PI) * 60);
-      if(m === 60) m = 0;
+      let m = Math.round(angle / (2 * Math.PI) * 60);
       m = Math.round(m / 5) * 5;
       if(m === 60) m = 0;
       clockMin = m;
       updateClockUI();
     }
   });
-  document.getElementById('clockTrigger').addEventListener('click', () => openClock('pgMasaValue', 'clockDisplay'));
-  document.getElementById('clockTriggerKend').addEventListener('click', () => openClock('masaValue', 'clockDisplayKend'));
+
+  // Trigger buttons — each opens clock pointing to its own hidden input & display span
+  document.getElementById('clockTrigger').addEventListener('click',     () => openClock('pgMasaValue', 'clockDisplay'));
+  document.getElementById('clockTriggerKend').addEventListener('click', () => openClock('masaValue',   'clockDisplayKend'));
+
   document.getElementById('clockCancel').addEventListener('click', closeClock);
   document.getElementById('clockOk').addEventListener('click', confirmClock);
   document.getElementById('clockOverlay').addEventListener('click', function(e){
     if(e.target === this) closeClock();
   });
+
   document.getElementById('hmHour').addEventListener('click', () => { clockMode = 'hour'; updateClockUI(); });
   document.getElementById('hmMin').addEventListener('click',  () => { clockMode = 'min';  updateClockUI(); });
-  document.getElementById('btnAM').addEventListener('click',  () => { clockAmPm = 'AM'; updateClockUI(); });
-  document.getElementById('btnPM').addEventListener('click',  () => { clockAmPm = 'PM'; updateClockUI(); });
+  document.getElementById('btnAM').addEventListener('click',  () => { clockAmPm = 'AM';   updateClockUI(); });
+  document.getElementById('btnPM').addEventListener('click',  () => { clockAmPm = 'PM';   updateClockUI(); });
 
+  // URL param jenis
   const params      = new URLSearchParams(window.location.search);
   const jenisParam  = params.get('jenis');
   const mappedJenis = jenisParam ? (jenisMap[jenisParam] || '') : '';
@@ -820,8 +797,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sel = document.getElementById('jenisSelect');
     sel.value = mappedJenis;
     updateFieldsByJenis(mappedJenis);
-
-    sel.disabled              = true;
+    sel.disabled = true;
     sel.style.pointerEvents   = 'none';
     sel.style.opacity         = '0.7';
     sel.style.backgroundColor = '#e5e7eb';
@@ -840,4 +816,3 @@ const submitBtn = document.getElementById('submitBtn');
 
 </body>
 </html>
-
