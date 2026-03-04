@@ -410,7 +410,6 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
 
   } else if(jenis === 'kenderaan'){
     data['Jenis Kenderaan'] = document.getElementById('jenisKenderaan').value || '-';
-    data['Masa']            = formatTime24(document.getElementById('masa').value);
     data['Nama Pemandu']    = document.getElementById('namaPemandu').value    || '-';
     data['Lokasi']          = document.getElementById('lokasi').value         || '-';
     data['Tujuan']          = document.getElementById('tujuan').value         || '-';
@@ -500,6 +499,7 @@ const submitBtn = document.getElementById('submitBtn');
 
 </body>
 </html>
+
 
 
 
