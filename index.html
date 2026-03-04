@@ -166,7 +166,11 @@ button:disabled{opacity:.6;cursor:not-allowed}
     </div>
     <div id="wrap_masa" class="hidden">
       <label>Masa</label>
-      <input type="time" id="masa">
+      <div class="clock-trigger" id="clockTriggerKend">
+        <span class="ct-icon">🕐</span>
+        <span class="ct-time ct-placeholder" id="clockDisplayKend">Pilih masa...</span>
+      </div>
+      <input type="hidden" id="masaValue">
     </div>
     <div id="wrap_namaPemandu" class="hidden">
       <label>Nama Pemandu</label>
@@ -187,7 +191,6 @@ button:disabled{opacity:.6;cursor:not-allowed}
 
     <!-- ═══════════════════════════════
          PERMOHONAN KENDERAAN
-         Fields: Jenis Kenderaan, Tarikh Pergi, Tarikh Balik, Masa, Nama Pemandu, Lokasi, Tujuan
     ═══════════════════════════════ -->
     <div id="wrap_pgJenisKenderaan" class="hidden">
       <label>Jenis Kenderaan</label>
@@ -201,16 +204,46 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <label>Tarikh Balik <span style="color:red">*</span></label>
       <input type="date" id="pgTarikhBalik">
     </div>
+
+    <!-- ✅ Clock Picker -->
     <div id="wrap_pgMasa" class="hidden">
       <label>Masa <span style="color:red">*</span></label>
-      <div style="display:flex;gap:8px;">
-        <input type="time" id="pgMasa" style="flex:1;">
-        <select id="pgMasaAmPm" style="width:90px;flex-shrink:0;">
-          <option value="AM">AM</option>
-          <option value="PM">PM</option>
-        </select>
+      <div class="clock-trigger" id="clockTrigger">
+        <span class="ct-icon">🕐</span>
+        <span class="ct-time ct-placeholder" id="clockDisplay">Pilih masa...</span>
+      </div>
+      <input type="hidden" id="pgMasaValue">
+    </div>
+
+    <!-- Clock Modal -->
+    <div class="clock-overlay" id="clockOverlay">
+      <div class="clock-modal">
+        <div class="clock-display">
+          <div class="cd-label" id="clockModeLabel">Pilih Jam</div>
+          <div class="clock-hm">
+            <span class="hm-part active" id="hmHour">12</span>
+            <span class="hm-sep">:</span>
+            <span class="hm-part" id="hmMin">00</span>
+          </div>
+          <div class="ampm-row">
+            <button class="ampm-btn active" id="btnAM" type="button">AM</button>
+            <button class="ampm-btn" id="btnPM" type="button">PM</button>
+          </div>
+        </div>
+        <div class="clock-face-wrap">
+          <div class="clock-face" id="clockFace">
+            <div class="clock-center"></div>
+            <div class="clock-hand hand-hour" id="handHour"></div>
+            <div class="clock-hand hand-min hidden" id="handMin"></div>
+          </div>
+        </div>
+        <div class="clock-actions">
+          <button class="btn-cancel" type="button" id="clockCancel">Batal</button>
+          <button class="btn-ok" type="button" id="clockOk">OK</button>
+        </div>
       </div>
     </div>
+
     <div id="wrap_pgNamaPemandu" class="hidden">
       <label>Nama Pemandu</label>
       <input type="text" id="pgNamaPemandu" placeholder="Nama Pemandu">
@@ -224,6 +257,7 @@ button:disabled{opacity:.6;cursor:not-allowed}
       <input type="text" id="pgTujuan" placeholder="Tujuan">
     </div>
 
+    
     <!-- ═══════════════════════════════
          PROJEKTOR
     ═══════════════════════════════ -->
@@ -552,3 +586,4 @@ const submitBtn = document.getElementById('submitBtn');
 
 </body>
 </html>
+
