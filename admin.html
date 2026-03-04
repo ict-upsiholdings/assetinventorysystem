@@ -179,7 +179,6 @@ const qrGrid = document.getElementById('qrGrid');
 
 const FORM_URLS=[
  {label:"AlatTulis2026",              url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=AlatTulis2026"},
- // ✅ FIX 1: Nama QR ditukar kepada "PenggunaanKenderaan2026"
  {label:"PenggunaanKenderaan2026",    url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Kenderaan2026"},
  {label:"PermohonanKenderaan2026",    url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=PermohonanKenderaan2026"},
  {label:"Projektor2026",              url:"https://ict-upsiholdings.github.io/assetinventorysystem/index.html?jenis=Projektor2026"}
@@ -262,10 +261,10 @@ function formatValue(val){
  // ✅ Masa sahaja dari Google Sheets — simpan sebagai 1899-12-30Txx:xx:xx.000Z
  // Buang tarikh 1899, papar masa sahaja dalam format HH:MM
  if(/^1899-12-30T/i.test(str)){
-  const d=new Date(str);
+  const d = new Date(str);
   if(!isNaN(d)){
-   return String(d.getUTCHours()).padStart(2,'0')+':'+
-          String(d.getUTCMinutes()).padStart(2,'0');
+    return String(d.getHours()).padStart(2,'0') + ':' +
+           String(d.getMinutes()).padStart(2,'0');
   }
  }
 
@@ -421,3 +420,4 @@ document.addEventListener('DOMContentLoaded',generateQR);
  
 </body>
 </html>
+
