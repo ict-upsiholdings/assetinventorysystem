@@ -396,9 +396,9 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
   submitBtn.disabled = true;
 
   let data = {
-    Nama:      namaVal,
-    Jabatan:   jabVal,
-    Timestamp: new Date().toISOString()
+    nama:      namaVal,
+    jabatan:   jabVal,
+    timestamp: new Date().toISOString()
   };
 
   // ✅ BUG FIXED: Buang tanda '] yang salah
@@ -503,4 +503,5 @@ const submitBtn = document.getElementById('submitBtn');
 
 </body>
 </html>
+
 
