@@ -203,7 +203,13 @@ button:disabled{opacity:.6;cursor:not-allowed}
     </div>
     <div id="wrap_pgMasa" class="hidden">
       <label>Masa <span style="color:red">*</span></label>
-      <input type="time" id="pgMasa">
+      <div style="display:flex;gap:8px;">
+        <input type="time" id="pgMasa" style="flex:1;">
+        <select id="pgMasaAmPm" style="width:90px;flex-shrink:0;">
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </select>
+      </div>
     </div>
     <div id="wrap_pgNamaPemandu" class="hidden">
       <label>Nama Pemandu</label>
@@ -359,8 +365,7 @@ function updateFieldsByJenis(jenis){
     const el = document.getElementById(id);
     if(el){
       el.classList.add('hidden');
-      const input = el.querySelector('input,select');
-      if(input) input.value = '';
+        el.querySelectorAll('input,select').forEach(inp => inp.value = '');
     }
   });
 
@@ -462,7 +467,9 @@ document.getElementById('assetForm').addEventListener('submit', async e => {
     data.jenis_kenderaan = document.getElementById('pgJenisKenderaan').value || '-';
     data.tarikh_pergi  = document.getElementById('pgTarikhPergi').value  || '-';
     data.tarikh_balik  = document.getElementById('pgTarikhBalik').value  || '-';
-    data.masa          = document.getElementById('pgMasa').value         || '-';
+    const masaVal = document.getElementById('pgMasa').value;
+    const ampm    = document.getElementById('pgMasaAmPm').value;
+    data.masa = masaVal ? masaVal + ' ' + ampm : '-';
     data.nama_pemandu  = document.getElementById('pgNamaPemandu').value  || '-';
     data.lokasi        = document.getElementById('pgLokasi').value       || '-';
     data.tujuan        = document.getElementById('pgTujuan').value       || '-';
