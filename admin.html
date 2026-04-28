@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
 <style>
 :root{
@@ -81,6 +83,22 @@ body{background:linear-gradient(135deg,var(--bg1),var(--bg2));min-height:100vh;p
  cursor:pointer;
 }
 
+.btn-pdf{
+ width:100%;
+ padding:12px;
+ background:linear-gradient(135deg,#dc2626,#f97316);
+ color:white;border:none;
+ border-radius:10px;
+ font-weight:600;
+ cursor:pointer;
+}
+
+.export-row{
+ display:flex;
+ gap:10px;
+ margin-bottom:15px;
+}
+
 .filter{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px;}
 select,input{padding:10px;border-radius:8px;border:1px solid #ccc;flex:1;min-width:150px;}
 .table-wrap{background:var(--card);border-radius:12px;overflow-x:auto;}
@@ -143,8 +161,9 @@ th{background:var(--bg1);color:white;}
   </select>
   <input id="search" placeholder="Cari nama / jabatan / item" oninput="filterData()">
  </div>
- <div style="margin-bottom:15px;">
+ <div class="export-row">
   <button class="btn" onclick="exportExcel()">Export Excel</button>
+  <button class="btn-pdf" onclick="exportPDF()">Download PDF</button>
  </div>
  <div class="table-wrap">
   <table>
@@ -252,14 +271,11 @@ function formatDateTime(val){
  return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
 }
 
-// ✅ FIX 2: formatValue diperbaiki supaya masa = masa sahaja, tarikh = tarikh sahaja
 function formatValue(val){
  if(val===null||val===undefined) return '-';
  const str=String(val).trim();
  if(str===''||str==='-') return '-';
 
- // ✅ Masa sahaja dari Google Sheets — simpan sebagai 1899-12-30Txx:xx:xx.000Z
- // Buang tarikh 1899, papar masa sahaja dalam format HH:MM
  if(/^1899-12-30T/i.test(str)){
   const d = new Date(str);
   if(!isNaN(d)){
@@ -268,11 +284,9 @@ function formatValue(val){
   }
  }
 
- // ✅ Tarikh penuh ISO — papar tarikh + masa
  if(/^\d{4}-\d{2}-\d{2}T/i.test(str)){
   const d=new Date(str);
   if(!isNaN(d)){
-   // Kalau masa = 00:00, kemungkinan ini tarikh sahaja — papar tarikh sahaja
    const hh=d.getHours(), mn=d.getMinutes();
    const dateStr=String(d.getDate()).padStart(2,'0')+'/'+
                  String(d.getMonth()+1).padStart(2,'0')+'/'+
@@ -282,13 +296,11 @@ function formatValue(val){
   }
  }
 
- // ✅ Tarikh sahaja YYYY-MM-DD
  if(/^\d{4}-\d{2}-\d{2}$/.test(str)){
   const [y,m,d]=str.split('-');
   return `${d}/${m}/${y}`;
  }
 
- // ✅ Masa sahaja HH:MM atau HH:MM:SS (string biasa)
  if(/^\d{1,2}:\d{2}(:\d{2})?$/.test(str)){
   const parts=str.split(':');
   return parts[0].padStart(2,'0')+':'+parts[1].padStart(2,'0');
@@ -367,7 +379,6 @@ function filterData(){
  updateDash();
 }
 
-// Label papar untuk jenis
 const jenisLabel={
  'AlatTulis2026':           'AlatTulis2026',
  'Kenderaan2026':           'PenggunaanKenderaan2026',
@@ -407,6 +418,90 @@ function exportExcel(){
  XLSX.writeFile(wb,'Permohonan.xlsx');
 }
 
+/* ══════════════════════════
+   EXPORT PDF
+══════════════════════════ */
+function exportPDF(){
+ if(!filtered.length) return alert('Tiada data untuk dieksport');
+
+ const { jsPDF } = window.jspdf;
+ const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+
+ // Header bar
+ doc.setFillColor(26,35,80);
+ doc.rect(0,0,297,22,'F');
+
+ doc.setTextColor(255,255,255);
+ doc.setFontSize(13);
+ doc.setFont('helvetica','bold');
+ doc.text('UPSI Holdings Sdn. Bhd. — Data Permohonan', 148.5, 10, {align:'center'});
+
+ doc.setFontSize(8);
+ doc.setFont('helvetica','normal');
+ const now = new Date();
+ const tarikhCetak = formatDateTime(now.toISOString());
+ doc.text(`Dicetak pada: ${tarikhCetak}`, 148.5, 17, {align:'center'});
+
+ const strip = s => s.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+
+ const rows = filtered.map((row,i)=>[
+  i+1,
+  jenisLabel[row._jenis]||row._jenis,
+  getField(row,'Nama','nama'),
+  getField(row,'Jabatan','jabatan'),
+  strip(extractItems(row)),
+  formatDateTime(getTimestamp(row))
+ ]);
+
+ doc.autoTable({
+  startY: 26,
+  head:[['No','Jenis','Nama','Jabatan','Item Diminta','Tarikh Hantar']],
+  body: rows,
+  styles:{
+   fontSize:8,
+   cellPadding:3,
+   overflow:'linebreak',
+   valign:'top'
+  },
+  headStyles:{
+   fillColor:[26,35,80],
+   textColor:255,
+   fontStyle:'bold',
+   halign:'center'
+  },
+  alternateRowStyles:{
+   fillColor:[244,246,248]
+  },
+  columnStyles:{
+   0:{ cellWidth:10, halign:'center' },
+   1:{ cellWidth:42 },
+   2:{ cellWidth:35 },
+   3:{ cellWidth:35 },
+   4:{ cellWidth:100 },
+   5:{ cellWidth:38 },
+  },
+  margin:{ top:26, left:10, right:10 },
+  didDrawPage: function(data){
+   // Footer nombor halaman
+   const pageCount = doc.internal.getNumberOfPages();
+   const currentPage = doc.internal.getCurrentPageInfo().pageNumber;
+   doc.setFontSize(8);
+   doc.setTextColor(150);
+   doc.text(
+    `Halaman ${currentPage} / ${pageCount}`,
+    148.5,
+    doc.internal.pageSize.height - 5,
+    {align:'center'}
+   );
+  }
+ });
+
+ doc.save('Permohonan.pdf');
+}
+
+/* ══════════════════════════
+   DASHBOARD
+══════════════════════════ */
 function updateDash(){
  document.getElementById('total').innerText =filtered.length;
  document.getElementById('alat').innerText  =filtered.filter(x=>x._jenis==='AlatTulis2026').length;
@@ -420,4 +515,3 @@ document.addEventListener('DOMContentLoaded',generateQR);
  
 </body>
 </html>
-
